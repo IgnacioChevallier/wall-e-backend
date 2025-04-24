@@ -1,26 +1,43 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { PrismaService } from '../prisma/prisma.service';
+// import { LoginDto } from '../users/dto/login-user.dto';
+// import { RegisterDto } from '../users/dto/register-user.dto';
+import { JwtService } from '@nestjs/jwt';
+// import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
-  }
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+  ) {}
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  // async register(dto: RegisterDto) {
+  //   const hash: string = await bcrypt.hash(dto.password, 10);
+  //
+  //   // Check if user already exists
+  //   const user = await this.prisma.user.create({
+  //     data: { email: dto.email, password: hash },
+  //   });
+  //
+  //   return this.signToken(user.id, user.email);
+  // }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+  // async login(dto: LoginDto) {
+  //   const user = await this.prisma.user.findUnique({
+  //     where: { email: dto.email },
+  //   });
+  //   if (!user) throw new ForbiddenException('Credentials incorrect');
+  //
+  //   const pwMatches = await bcrypt.compare(dto.password, user.password);
+  //   if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
+  //
+  //   return this.signToken(user.id, user.email);
+  // }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  private async signToken(userId: string, email: string) {
+    const payload = { sub: userId, email };
+    const token = await this.jwt.signAsync(payload);
+    return { access_token: token };
   }
 }
