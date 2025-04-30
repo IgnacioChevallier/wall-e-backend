@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { LoginDto } from '../users/dto/login-user.dto';
-import { RegisterDto } from '../users/dto/register-user.dto';
+import { CreateUserDto } from '../users/dto/register-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../users/user.repository';
@@ -13,7 +13,7 @@ export class AuthService {
   ) {}
 
   // Register method for user registration
-  async register(dto: RegisterDto) {
+  async register(dto: CreateUserDto) {
     const hash: string = await bcrypt.hash(dto.password, 10);
 
     // Check if user already exists

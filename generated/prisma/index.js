@@ -176,11 +176,12 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "postgresql://postgres:password@localhost:5432/walle-db?schema=public"
+        "value": null
       }
     }
   },
