@@ -12,10 +12,17 @@ $ npm run format
 $ npm run lint
 ```
 
+# Docker
 ## To start services just run
 ```bash
 $ docker compose up -d
 ```
+## To recreate containers
+```bash
+$ docker-compose up --build -d --force-recreate
+```
+
+
 
 ## Description
 
