@@ -37,7 +37,7 @@ export class AuthService {
 
     const pwMatches = await bcrypt.compare(dto.password, user.password);
     if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
-
+    
     return this.signToken(user.id, user.email);
   }
 
