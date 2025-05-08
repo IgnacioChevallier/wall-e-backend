@@ -23,6 +23,10 @@ $ docker-compose up --build -d --force-recreate
 ```
 
 
+### init prisma migrations in the db
+```bash
+$ docker compose exec app npx prisma migrate dev --name init
+```
 
 ## Description
 
