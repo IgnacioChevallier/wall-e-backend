@@ -1,0 +1,18 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# AI Context Rule: NestJS Project Conventions
+
+📌 This project is built using [NestJS](https://docs.nestjs.com/), a progressive Node.js framework for building efficient and scalable server-side applications.
+
+## ✅ General Guidelines
+- Follow NestJS conventions for controllers, services, modules, and DTOs.
+- Business logic should be handled in services, not in controllers.
+
+## 🤖 Notes for AI Assistant
+- Use dependency injection as NestJS does by default.
+- Always validate inputs via DTOs and `class-validator`.
+- Follow Nest's modular architecture unless specified otherwise.
+

@@ -1,9 +1,9 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { LoginDto } from '../users/dto/login-user.dto';
-import { CreateUserDto } from '../users/dto/register-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../users/user.repository';
+import { RegisterUserDto } from './dto/register-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +13,7 @@ export class AuthService {
   ) {}
 
   // Register method for user registration
-  async register(dto: CreateUserDto) {
+  async register(dto: RegisterUserDto) {
     const hash: string = await bcrypt.hash(dto.password, 10);
 
     // Check if user already exists
@@ -31,7 +31,7 @@ export class AuthService {
   }
 
   // Login method for user authentication
-  async login(dto: LoginDto) {
+  async login(dto: LoginUserDto) {
     const user = await this.repository.findUserByEmail(dto.email);
     if (!user) throw new ForbiddenException('Credentials incorrect');
 
