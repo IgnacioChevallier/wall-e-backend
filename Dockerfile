@@ -1,23 +1,16 @@
-# Use an official Node.js runtime as a parent image
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
-# Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json (or yarn.lock)
 COPY package*.json ./
 
-# Install app dependencies
 RUN npm install
 
-# Copy the rest of the application code
 COPY . .
 
-# Build the app
 RUN npm run build
 
-# Production image
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /usr/src/app
 

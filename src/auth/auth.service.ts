@@ -32,6 +32,7 @@ export class AuthService {
 
   // Login method for user authentication
   async login(dto: LoginUserDto) {
+    console.log('login 2', dto);
     const user = await this.repository.findUserByEmail(dto.email);
     if (!user) throw new ForbiddenException('Credentials incorrect');
 
