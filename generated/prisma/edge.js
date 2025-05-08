@@ -150,7 +150,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/ignacio/Proyects/2025/wall-e-backend/generated/prisma",
+      "value": "/home/matias/projects/walle-backend/wall-e-backend/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -161,10 +161,14 @@ const config = {
         "fromEnvVar": null,
         "value": "debian-openssl-3.0.x",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "linux-musl-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/ignacio/Proyects/2025/wall-e-backend/prisma/schema.prisma",
+    "sourceFilePath": "/home/matias/projects/walle-backend/wall-e-backend/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -178,16 +182,17 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "postgresql://walleuser:wallepassword@localhost:5432/walledb"
+        "value": null
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id        String   @id @default(uuid())\n  email     String   @unique\n  password  String\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  wallet    Wallet?\n}\n\nmodel Wallet {\n  id           String        @id @default(uuid())\n  balance      Float         @default(0)\n  userId       String        @unique\n  user         User          @relation(fields: [userId], references: [id])\n  transactions Transaction[]\n}\n\nmodel Transaction {\n  id          String          @id @default(uuid())\n  amount      Float\n  type        TransactionType\n  description String?\n  createdAt   DateTime        @default(now())\n  walletId    String\n  wallet      Wallet          @relation(fields: [walletId], references: [id])\n}\n\nenum TransactionType {\n  IN\n  OUT\n}\n",
-  "inlineSchemaHash": "41fea404c3cfd6d642e09d51bca529d37f165d3833fb468168f0d58b68c2dc9b",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../generated/prisma\"\n  binaryTargets = [\"native\", \"linux-musl-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id        String   @id @default(uuid())\n  email     String   @unique\n  password  String\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n  wallet    Wallet?\n}\n\nmodel Wallet {\n  id           String        @id @default(uuid())\n  balance      Float         @default(0)\n  userId       String        @unique\n  user         User          @relation(fields: [userId], references: [id])\n  transactions Transaction[]\n}\n\nmodel Transaction {\n  id          String          @id @default(uuid())\n  amount      Float\n  type        TransactionType\n  description String?\n  createdAt   DateTime        @default(now())\n  walletId    String\n  wallet      Wallet          @relation(fields: [walletId], references: [id])\n}\n\nenum TransactionType {\n  IN\n  OUT\n}\n",
+  "inlineSchemaHash": "46c3587de03ebd3a3919dcf83a62cddc48d707d4dff254da5c6dc6059c4cf9d6",
   "copyEngine": true
 }
 config.dirname = '/'
