@@ -16,6 +16,10 @@ $ npm run lint
 ```bash
 $ docker compose up -d
 ```
+### init prisma migrations in the db
+```bash
+$ docker compose exec app npx prisma migrate dev --name init
+```
 
 ## Description
 
