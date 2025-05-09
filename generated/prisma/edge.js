@@ -150,7 +150,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/matias/projects/walle-backend/wall-e-backend/generated/prisma",
+      "value": "/usr/src/app/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -159,7 +159,7 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "debian-openssl-3.0.x",
+        "value": "linux-musl-openssl-3.0.x",
         "native": true
       },
       {
@@ -168,7 +168,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/matias/projects/walle-backend/wall-e-backend/prisma/schema.prisma",
+    "sourceFilePath": "/usr/src/app/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
