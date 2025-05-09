@@ -24,10 +24,10 @@ export class AuthService {
     }
 
     // Create the new user
-    const user = await this.repository.createUser(dto.email, hash);
+    const userWithWallet = await this.repository.createUser(dto.email, hash);
 
     // Sign and return the JWT token
-    return this.signToken(user.id, user.email);
+    return this.signToken(userWithWallet.id, userWithWallet.email);
   }
 
   // Login method for user authentication
