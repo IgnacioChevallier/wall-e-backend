@@ -32,17 +32,12 @@ export class WalletService {
   remove(id: string) {
     return this.prisma.wallet.delete({ where: { id } });
   }
-
+  
   async getWalletBalance(userId: string): Promise<number> {
-    const wallet = await this.prisma.wallet.findUnique({
-      where: { userId },
-      select: { balance: true },
-    });
-
+    const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
     if (!wallet) {
       throw new NotFoundException('Wallet not found');
-    } 
-
+    }
     return wallet.balance;
   }
 
