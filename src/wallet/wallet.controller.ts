@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { CreateWalletDto } from './dto/create-wallet.dto';
@@ -20,9 +22,16 @@ export class WalletController {
     return this.walletService.create(createWalletDto);
   }
 
+  @Get('balance')
+  async getBalance(@Request() req) {
+    return {
+      balance: await this.walletService.getWalletBalance(req.user.sub)
+    };
+  }
+
   @Get()
-  findAll() {
-    return this.walletService.findAll();
+  async getWalletDetails(@Request() req) {
+    return this.walletService.getWalletDetails(req.user.sub);
   }
 
   @Get(':id')
