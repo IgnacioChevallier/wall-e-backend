@@ -19,20 +19,16 @@ export class UserRepository {
     });
   }
 
-  createUser(email: string, password: string): Promise<User & { wallet: Wallet | null }> {
+  createUser(email: string, password: string): Promise<User> {
     return this.prisma.user.create({
       data: {
         email,
         password,
         wallet: {
-          create: {
-            balance: 0, // Initialize with zero balance
-          }
+          create: { balance: 0 }
         }
       },
-      include: {
-        wallet: true,
-      }
+      include: { wallet: true }
     });
   }
 }
