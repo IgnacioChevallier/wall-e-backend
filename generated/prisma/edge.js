@@ -150,7 +150,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/usr/src/app/generated/prisma",
+      "value": "/Users/franciscolang/projects/aseca/wall-e-backend/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -159,7 +159,7 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "linux-musl-openssl-3.0.x",
+        "value": "darwin-arm64",
         "native": true
       },
       {
@@ -168,7 +168,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/usr/src/app/prisma/schema.prisma",
+    "sourceFilePath": "/Users/franciscolang/projects/aseca/wall-e-backend/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -186,7 +186,7 @@ const config = {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "postgresql://walleuser:wallepassword@db:5432/walledb"
+        "value": "postgresql://walleuser:wallepassword@localhost:5432/walledb"
       }
     }
   },
