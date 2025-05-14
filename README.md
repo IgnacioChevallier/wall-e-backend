@@ -1,10 +1,93 @@
-
 ## Related to prisma
 Run this when changing the prisma.scheme
 ```bash
 $ npx prisma generate
 $ npx prisma migrate dev
 ```
+
+# CI/CD Pipeline
+
+## Continuous Integration (CI)
+This project uses GitHub Actions for continuous integration. The CI pipeline runs automatically when:
+- You push to any branch (except main)
+- You create a pull request to the main branch
+
+The CI process includes:
+1. Code linting and type checking
+2. Running unit tests
+3. Building the application
+4. Building and testing the Docker image and Docker Compose stack
+5. Verifying SemVer compliance (on PRs to main)
+
+## Continuous Deployment (CD)
+The CD pipeline runs automatically when code is merged to the main branch and includes:
+1. Building the Docker image with version tag from package.json
+2. Pushing the image to GitHub Container Registry (ghcr.io)
+3. Creating a GitHub Release with the version number
+4. Optionally deploying to a production server
+
+### Required GitHub Secrets for Deployment
+
+For the CD pipeline to work properly, set up these GitHub repository secrets:
+
+**Basic Deployment:**
+- No additional secrets required for image publishing to GitHub Container Registry
+
+**Production Deployment:**
+- `DEPLOY_HOST`: Host IP or domain of your production server
+- `DEPLOY_USER`: SSH username for the production server
+- `DEPLOY_SSH_KEY`: Private SSH key for authentication
+
+**Database Configuration:**
+- `DATABASE_URL`: Full database connection string
+- `POSTGRES_USER`: Database username
+- `POSTGRES_PASSWORD`: Database password
+- `POSTGRES_DB`: Database name
+
+**Application Security:**
+- `JWT_SECRET`: Secret key for JWT token generation/validation
+
+To set up these secrets:
+1. Go to your GitHub repository
+2. Navigate to Settings > Secrets and variables > Actions
+3. Click "New repository secret" and add each required secret
+
+To use the latest version in your Docker Compose:
+```yaml
+services:
+  app:
+    image: ghcr.io/username/wall-e-backend:latest  # Replace with your GitHub username
+```
+
+## Deployment with Docker Compose
+For production deployment, use the production Docker Compose file:
+
+1. Create a `.env` file with your environment variables:
+```
+DATABASE_URL=postgresql://postgres:password@db:5432/postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+POSTGRES_DB=postgres
+```
+
+2. Run the production stack:
+```bash
+$ docker-compose -f docker-compose.prod.yml up -d
+```
+
+3. To update to a new version:
+```bash
+$ docker-compose -f docker-compose.prod.yml pull
+$ docker-compose -f docker-compose.prod.yml up -d
+```
+
+### Working with Semantic Versioning (SemVer)
+This project follows [Semantic Versioning](https://semver.org/) (MAJOR.MINOR.PATCH):
+- MAJOR: Breaking changes
+- MINOR: New features (backward compatible)
+- PATCH: Bug fixes (backward compatible)
+
+When creating a pull request to main, ensure you've updated the version in package.json according to SemVer principles.
 
 ## To format or lint run
 ```bash

@@ -1,0 +1,71 @@
+name: NestJS Backend CI
+
+on:
+  push:
+    branches: ['*', '!main']
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Check SemVer compliance
+        if: github.event_name == 'pull_request' && github.base_ref == 'main'
+        run: |
+          chmod +x .github/scripts/semver.sh
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+          
+          if [[ ! $CURRENT_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Version must follow SemVer format (MAJOR.MINOR.PATCH)"
+            exit 1
+          fi
+      
+      - name: Generate Prisma client
+        run: npx prisma generate
+      
+      - name: Run linting
+        run: npm run lint
+      
+      - name: Run typescript compiler
+        run: npx tsc --noEmit
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Build application
+        run: npm run build
+      
+      - name: Build Docker image
+        run: |
+          docker build -t wall-e-backend:$(echo $GITHUB_SHA | head -c7) .
+        
+      - name: Set up Docker Compose
+        run: |
+          echo "DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres" > .env
+          echo "POSTGRES_USER=postgres" >> .env
+          echo "POSTGRES_PASSWORD=postgres" >> .env
+          echo "POSTGRES_DB=postgres" >> .env
+      
+      - name: Run Docker Compose healthcheck
+        run: |
+          docker-compose up -d
+          sleep 10
+          docker-compose ps
+          docker-compose logs
+          docker-compose exec -T app node -e "console.log('App container is working')" || exit 1
+          docker-compose down 
