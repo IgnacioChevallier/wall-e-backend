@@ -1,11 +1,12 @@
-import { IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsPositive, IsString, Min } from 'class-validator';
 
 export class P2PTransferDto {
   @IsString()
   @IsNotEmpty()
-  recipientIdentifier: string; // Email or alias
+  recipientIdentifier: string;
 
   @IsNumber()
-  @Min(0.01) // Assuming a minimum transfer amount
+  @Min(0.01)
+  @IsPositive()
   amount: number;
 } 

@@ -1068,11 +1068,15 @@ export namespace Prisma {
    */
 
   export type WalletCountOutputType = {
-    transactions: number
+    initiatedTransactions: number
+    receivedTransactions: number
+    allTransactions: number
   }
 
   export type WalletCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    transactions?: boolean | WalletCountOutputTypeCountTransactionsArgs
+    initiatedTransactions?: boolean | WalletCountOutputTypeCountInitiatedTransactionsArgs
+    receivedTransactions?: boolean | WalletCountOutputTypeCountReceivedTransactionsArgs
+    allTransactions?: boolean | WalletCountOutputTypeCountAllTransactionsArgs
   }
 
   // Custom InputTypes
@@ -1089,7 +1093,21 @@ export namespace Prisma {
   /**
    * WalletCountOutputType without action
    */
-  export type WalletCountOutputTypeCountTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type WalletCountOutputTypeCountInitiatedTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TransactionWhereInput
+  }
+
+  /**
+   * WalletCountOutputType without action
+   */
+  export type WalletCountOutputTypeCountReceivedTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TransactionWhereInput
+  }
+
+  /**
+   * WalletCountOutputType without action
+   */
+  export type WalletCountOutputTypeCountAllTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TransactionWhereInput
   }
 
@@ -1111,6 +1129,7 @@ export namespace Prisma {
   export type UserMinAggregateOutputType = {
     id: string | null
     email: string | null
+    alias: string | null
     password: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -1119,6 +1138,7 @@ export namespace Prisma {
   export type UserMaxAggregateOutputType = {
     id: string | null
     email: string | null
+    alias: string | null
     password: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -1127,6 +1147,7 @@ export namespace Prisma {
   export type UserCountAggregateOutputType = {
     id: number
     email: number
+    alias: number
     password: number
     createdAt: number
     updatedAt: number
@@ -1137,6 +1158,7 @@ export namespace Prisma {
   export type UserMinAggregateInputType = {
     id?: true
     email?: true
+    alias?: true
     password?: true
     createdAt?: true
     updatedAt?: true
@@ -1145,6 +1167,7 @@ export namespace Prisma {
   export type UserMaxAggregateInputType = {
     id?: true
     email?: true
+    alias?: true
     password?: true
     createdAt?: true
     updatedAt?: true
@@ -1153,6 +1176,7 @@ export namespace Prisma {
   export type UserCountAggregateInputType = {
     id?: true
     email?: true
+    alias?: true
     password?: true
     createdAt?: true
     updatedAt?: true
@@ -1234,6 +1258,7 @@ export namespace Prisma {
   export type UserGroupByOutputType = {
     id: string
     email: string
+    alias: string
     password: string
     createdAt: Date
     updatedAt: Date
@@ -1259,6 +1284,7 @@ export namespace Prisma {
   export type UserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     email?: boolean
+    alias?: boolean
     password?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -1268,6 +1294,7 @@ export namespace Prisma {
   export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     email?: boolean
+    alias?: boolean
     password?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -1276,6 +1303,7 @@ export namespace Prisma {
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     email?: boolean
+    alias?: boolean
     password?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -1284,12 +1312,13 @@ export namespace Prisma {
   export type UserSelectScalar = {
     id?: boolean
     email?: boolean
+    alias?: boolean
     password?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "password" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "alias" | "password" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     wallet?: boolean | User$walletArgs<ExtArgs>
   }
@@ -1304,6 +1333,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       email: string
+      alias: string
       password: string
       createdAt: Date
       updatedAt: Date
@@ -1733,6 +1763,7 @@ export namespace Prisma {
   interface UserFieldRefs {
     readonly id: FieldRef<"User", 'String'>
     readonly email: FieldRef<"User", 'String'>
+    readonly alias: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
@@ -2344,7 +2375,9 @@ export namespace Prisma {
     balance?: boolean
     userId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
-    transactions?: boolean | Wallet$transactionsArgs<ExtArgs>
+    initiatedTransactions?: boolean | Wallet$initiatedTransactionsArgs<ExtArgs>
+    receivedTransactions?: boolean | Wallet$receivedTransactionsArgs<ExtArgs>
+    allTransactions?: boolean | Wallet$allTransactionsArgs<ExtArgs>
     _count?: boolean | WalletCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["wallet"]>
 
@@ -2371,7 +2404,9 @@ export namespace Prisma {
   export type WalletOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "balance" | "userId", ExtArgs["result"]["wallet"]>
   export type WalletInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
-    transactions?: boolean | Wallet$transactionsArgs<ExtArgs>
+    initiatedTransactions?: boolean | Wallet$initiatedTransactionsArgs<ExtArgs>
+    receivedTransactions?: boolean | Wallet$receivedTransactionsArgs<ExtArgs>
+    allTransactions?: boolean | Wallet$allTransactionsArgs<ExtArgs>
     _count?: boolean | WalletCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type WalletIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2385,7 +2420,9 @@ export namespace Prisma {
     name: "Wallet"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
-      transactions: Prisma.$TransactionPayload<ExtArgs>[]
+      initiatedTransactions: Prisma.$TransactionPayload<ExtArgs>[]
+      receivedTransactions: Prisma.$TransactionPayload<ExtArgs>[]
+      allTransactions: Prisma.$TransactionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2786,7 +2823,9 @@ export namespace Prisma {
   export interface Prisma__WalletClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    transactions<T extends Wallet$transactionsArgs<ExtArgs> = {}>(args?: Subset<T, Wallet$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    initiatedTransactions<T extends Wallet$initiatedTransactionsArgs<ExtArgs> = {}>(args?: Subset<T, Wallet$initiatedTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    receivedTransactions<T extends Wallet$receivedTransactionsArgs<ExtArgs> = {}>(args?: Subset<T, Wallet$receivedTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    allTransactions<T extends Wallet$allTransactionsArgs<ExtArgs> = {}>(args?: Subset<T, Wallet$allTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3215,9 +3254,57 @@ export namespace Prisma {
   }
 
   /**
-   * Wallet.transactions
+   * Wallet.initiatedTransactions
    */
-  export type Wallet$transactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Wallet$initiatedTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Transaction
+     */
+    select?: TransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Transaction
+     */
+    omit?: TransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TransactionInclude<ExtArgs> | null
+    where?: TransactionWhereInput
+    orderBy?: TransactionOrderByWithRelationInput | TransactionOrderByWithRelationInput[]
+    cursor?: TransactionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TransactionScalarFieldEnum | TransactionScalarFieldEnum[]
+  }
+
+  /**
+   * Wallet.receivedTransactions
+   */
+  export type Wallet$receivedTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Transaction
+     */
+    select?: TransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Transaction
+     */
+    omit?: TransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TransactionInclude<ExtArgs> | null
+    where?: TransactionWhereInput
+    orderBy?: TransactionOrderByWithRelationInput | TransactionOrderByWithRelationInput[]
+    cursor?: TransactionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TransactionScalarFieldEnum | TransactionScalarFieldEnum[]
+  }
+
+  /**
+   * Wallet.allTransactions
+   */
+  export type Wallet$allTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Transaction
      */
@@ -3283,7 +3370,9 @@ export namespace Prisma {
     type: $Enums.TransactionType | null
     description: string | null
     createdAt: Date | null
-    walletId: string | null
+    senderWalletId: string | null
+    receiverWalletId: string | null
+    effectedWalletId: string | null
   }
 
   export type TransactionMaxAggregateOutputType = {
@@ -3292,7 +3381,9 @@ export namespace Prisma {
     type: $Enums.TransactionType | null
     description: string | null
     createdAt: Date | null
-    walletId: string | null
+    senderWalletId: string | null
+    receiverWalletId: string | null
+    effectedWalletId: string | null
   }
 
   export type TransactionCountAggregateOutputType = {
@@ -3301,7 +3392,9 @@ export namespace Prisma {
     type: number
     description: number
     createdAt: number
-    walletId: number
+    senderWalletId: number
+    receiverWalletId: number
+    effectedWalletId: number
     _all: number
   }
 
@@ -3320,7 +3413,9 @@ export namespace Prisma {
     type?: true
     description?: true
     createdAt?: true
-    walletId?: true
+    senderWalletId?: true
+    receiverWalletId?: true
+    effectedWalletId?: true
   }
 
   export type TransactionMaxAggregateInputType = {
@@ -3329,7 +3424,9 @@ export namespace Prisma {
     type?: true
     description?: true
     createdAt?: true
-    walletId?: true
+    senderWalletId?: true
+    receiverWalletId?: true
+    effectedWalletId?: true
   }
 
   export type TransactionCountAggregateInputType = {
@@ -3338,7 +3435,9 @@ export namespace Prisma {
     type?: true
     description?: true
     createdAt?: true
-    walletId?: true
+    senderWalletId?: true
+    receiverWalletId?: true
+    effectedWalletId?: true
     _all?: true
   }
 
@@ -3434,7 +3533,9 @@ export namespace Prisma {
     type: $Enums.TransactionType
     description: string | null
     createdAt: Date
-    walletId: string
+    senderWalletId: string
+    receiverWalletId: string
+    effectedWalletId: string
     _count: TransactionCountAggregateOutputType | null
     _avg: TransactionAvgAggregateOutputType | null
     _sum: TransactionSumAggregateOutputType | null
@@ -3462,8 +3563,12 @@ export namespace Prisma {
     type?: boolean
     description?: boolean
     createdAt?: boolean
-    walletId?: boolean
-    wallet?: boolean | WalletDefaultArgs<ExtArgs>
+    senderWalletId?: boolean
+    receiverWalletId?: boolean
+    effectedWalletId?: boolean
+    senderWallet?: boolean | WalletDefaultArgs<ExtArgs>
+    receiverWallet?: boolean | WalletDefaultArgs<ExtArgs>
+    effectedWallet?: boolean | WalletDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["transaction"]>
 
   export type TransactionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3472,8 +3577,12 @@ export namespace Prisma {
     type?: boolean
     description?: boolean
     createdAt?: boolean
-    walletId?: boolean
-    wallet?: boolean | WalletDefaultArgs<ExtArgs>
+    senderWalletId?: boolean
+    receiverWalletId?: boolean
+    effectedWalletId?: boolean
+    senderWallet?: boolean | WalletDefaultArgs<ExtArgs>
+    receiverWallet?: boolean | WalletDefaultArgs<ExtArgs>
+    effectedWallet?: boolean | WalletDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["transaction"]>
 
   export type TransactionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3482,8 +3591,12 @@ export namespace Prisma {
     type?: boolean
     description?: boolean
     createdAt?: boolean
-    walletId?: boolean
-    wallet?: boolean | WalletDefaultArgs<ExtArgs>
+    senderWalletId?: boolean
+    receiverWalletId?: boolean
+    effectedWalletId?: boolean
+    senderWallet?: boolean | WalletDefaultArgs<ExtArgs>
+    receiverWallet?: boolean | WalletDefaultArgs<ExtArgs>
+    effectedWallet?: boolean | WalletDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["transaction"]>
 
   export type TransactionSelectScalar = {
@@ -3492,24 +3605,34 @@ export namespace Prisma {
     type?: boolean
     description?: boolean
     createdAt?: boolean
-    walletId?: boolean
+    senderWalletId?: boolean
+    receiverWalletId?: boolean
+    effectedWalletId?: boolean
   }
 
-  export type TransactionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "type" | "description" | "createdAt" | "walletId", ExtArgs["result"]["transaction"]>
+  export type TransactionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "type" | "description" | "createdAt" | "senderWalletId" | "receiverWalletId" | "effectedWalletId", ExtArgs["result"]["transaction"]>
   export type TransactionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    wallet?: boolean | WalletDefaultArgs<ExtArgs>
+    senderWallet?: boolean | WalletDefaultArgs<ExtArgs>
+    receiverWallet?: boolean | WalletDefaultArgs<ExtArgs>
+    effectedWallet?: boolean | WalletDefaultArgs<ExtArgs>
   }
   export type TransactionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    wallet?: boolean | WalletDefaultArgs<ExtArgs>
+    senderWallet?: boolean | WalletDefaultArgs<ExtArgs>
+    receiverWallet?: boolean | WalletDefaultArgs<ExtArgs>
+    effectedWallet?: boolean | WalletDefaultArgs<ExtArgs>
   }
   export type TransactionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    wallet?: boolean | WalletDefaultArgs<ExtArgs>
+    senderWallet?: boolean | WalletDefaultArgs<ExtArgs>
+    receiverWallet?: boolean | WalletDefaultArgs<ExtArgs>
+    effectedWallet?: boolean | WalletDefaultArgs<ExtArgs>
   }
 
   export type $TransactionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Transaction"
     objects: {
-      wallet: Prisma.$WalletPayload<ExtArgs>
+      senderWallet: Prisma.$WalletPayload<ExtArgs>
+      receiverWallet: Prisma.$WalletPayload<ExtArgs>
+      effectedWallet: Prisma.$WalletPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3517,7 +3640,9 @@ export namespace Prisma {
       type: $Enums.TransactionType
       description: string | null
       createdAt: Date
-      walletId: string
+      senderWalletId: string
+      receiverWalletId: string
+      effectedWalletId: string
     }, ExtArgs["result"]["transaction"]>
     composites: {}
   }
@@ -3912,7 +4037,9 @@ export namespace Prisma {
    */
   export interface Prisma__TransactionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    wallet<T extends WalletDefaultArgs<ExtArgs> = {}>(args?: Subset<T, WalletDefaultArgs<ExtArgs>>): Prisma__WalletClient<$Result.GetResult<Prisma.$WalletPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    senderWallet<T extends WalletDefaultArgs<ExtArgs> = {}>(args?: Subset<T, WalletDefaultArgs<ExtArgs>>): Prisma__WalletClient<$Result.GetResult<Prisma.$WalletPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    receiverWallet<T extends WalletDefaultArgs<ExtArgs> = {}>(args?: Subset<T, WalletDefaultArgs<ExtArgs>>): Prisma__WalletClient<$Result.GetResult<Prisma.$WalletPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    effectedWallet<T extends WalletDefaultArgs<ExtArgs> = {}>(args?: Subset<T, WalletDefaultArgs<ExtArgs>>): Prisma__WalletClient<$Result.GetResult<Prisma.$WalletPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3947,7 +4074,9 @@ export namespace Prisma {
     readonly type: FieldRef<"Transaction", 'TransactionType'>
     readonly description: FieldRef<"Transaction", 'String'>
     readonly createdAt: FieldRef<"Transaction", 'DateTime'>
-    readonly walletId: FieldRef<"Transaction", 'String'>
+    readonly senderWalletId: FieldRef<"Transaction", 'String'>
+    readonly receiverWalletId: FieldRef<"Transaction", 'String'>
+    readonly effectedWalletId: FieldRef<"Transaction", 'String'>
   }
     
 
@@ -4379,6 +4508,7 @@ export namespace Prisma {
   export const UserScalarFieldEnum: {
     id: 'id',
     email: 'email',
+    alias: 'alias',
     password: 'password',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -4402,7 +4532,9 @@ export namespace Prisma {
     type: 'type',
     description: 'description',
     createdAt: 'createdAt',
-    walletId: 'walletId'
+    senderWalletId: 'senderWalletId',
+    receiverWalletId: 'receiverWalletId',
+    effectedWalletId: 'effectedWalletId'
   };
 
   export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum]
@@ -4516,6 +4648,7 @@ export namespace Prisma {
     NOT?: UserWhereInput | UserWhereInput[]
     id?: StringFilter<"User"> | string
     email?: StringFilter<"User"> | string
+    alias?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
@@ -4525,6 +4658,7 @@ export namespace Prisma {
   export type UserOrderByWithRelationInput = {
     id?: SortOrder
     email?: SortOrder
+    alias?: SortOrder
     password?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -4534,6 +4668,7 @@ export namespace Prisma {
   export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     email?: string
+    alias?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
@@ -4541,11 +4676,12 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     wallet?: XOR<WalletNullableScalarRelationFilter, WalletWhereInput> | null
-  }, "id" | "email">
+  }, "id" | "email" | "alias">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
     email?: SortOrder
+    alias?: SortOrder
     password?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -4560,6 +4696,7 @@ export namespace Prisma {
     NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"User"> | string
     email?: StringWithAggregatesFilter<"User"> | string
+    alias?: StringWithAggregatesFilter<"User"> | string
     password?: StringWithAggregatesFilter<"User"> | string
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -4573,7 +4710,9 @@ export namespace Prisma {
     balance?: FloatFilter<"Wallet"> | number
     userId?: StringFilter<"Wallet"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-    transactions?: TransactionListRelationFilter
+    initiatedTransactions?: TransactionListRelationFilter
+    receivedTransactions?: TransactionListRelationFilter
+    allTransactions?: TransactionListRelationFilter
   }
 
   export type WalletOrderByWithRelationInput = {
@@ -4581,7 +4720,9 @@ export namespace Prisma {
     balance?: SortOrder
     userId?: SortOrder
     user?: UserOrderByWithRelationInput
-    transactions?: TransactionOrderByRelationAggregateInput
+    initiatedTransactions?: TransactionOrderByRelationAggregateInput
+    receivedTransactions?: TransactionOrderByRelationAggregateInput
+    allTransactions?: TransactionOrderByRelationAggregateInput
   }
 
   export type WalletWhereUniqueInput = Prisma.AtLeast<{
@@ -4592,7 +4733,9 @@ export namespace Prisma {
     NOT?: WalletWhereInput | WalletWhereInput[]
     balance?: FloatFilter<"Wallet"> | number
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-    transactions?: TransactionListRelationFilter
+    initiatedTransactions?: TransactionListRelationFilter
+    receivedTransactions?: TransactionListRelationFilter
+    allTransactions?: TransactionListRelationFilter
   }, "id" | "userId">
 
   export type WalletOrderByWithAggregationInput = {
@@ -4624,8 +4767,12 @@ export namespace Prisma {
     type?: EnumTransactionTypeFilter<"Transaction"> | $Enums.TransactionType
     description?: StringNullableFilter<"Transaction"> | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
-    walletId?: StringFilter<"Transaction"> | string
-    wallet?: XOR<WalletScalarRelationFilter, WalletWhereInput>
+    senderWalletId?: StringFilter<"Transaction"> | string
+    receiverWalletId?: StringFilter<"Transaction"> | string
+    effectedWalletId?: StringFilter<"Transaction"> | string
+    senderWallet?: XOR<WalletScalarRelationFilter, WalletWhereInput>
+    receiverWallet?: XOR<WalletScalarRelationFilter, WalletWhereInput>
+    effectedWallet?: XOR<WalletScalarRelationFilter, WalletWhereInput>
   }
 
   export type TransactionOrderByWithRelationInput = {
@@ -4634,8 +4781,12 @@ export namespace Prisma {
     type?: SortOrder
     description?: SortOrderInput | SortOrder
     createdAt?: SortOrder
-    walletId?: SortOrder
-    wallet?: WalletOrderByWithRelationInput
+    senderWalletId?: SortOrder
+    receiverWalletId?: SortOrder
+    effectedWalletId?: SortOrder
+    senderWallet?: WalletOrderByWithRelationInput
+    receiverWallet?: WalletOrderByWithRelationInput
+    effectedWallet?: WalletOrderByWithRelationInput
   }
 
   export type TransactionWhereUniqueInput = Prisma.AtLeast<{
@@ -4647,8 +4798,12 @@ export namespace Prisma {
     type?: EnumTransactionTypeFilter<"Transaction"> | $Enums.TransactionType
     description?: StringNullableFilter<"Transaction"> | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
-    walletId?: StringFilter<"Transaction"> | string
-    wallet?: XOR<WalletScalarRelationFilter, WalletWhereInput>
+    senderWalletId?: StringFilter<"Transaction"> | string
+    receiverWalletId?: StringFilter<"Transaction"> | string
+    effectedWalletId?: StringFilter<"Transaction"> | string
+    senderWallet?: XOR<WalletScalarRelationFilter, WalletWhereInput>
+    receiverWallet?: XOR<WalletScalarRelationFilter, WalletWhereInput>
+    effectedWallet?: XOR<WalletScalarRelationFilter, WalletWhereInput>
   }, "id">
 
   export type TransactionOrderByWithAggregationInput = {
@@ -4657,7 +4812,9 @@ export namespace Prisma {
     type?: SortOrder
     description?: SortOrderInput | SortOrder
     createdAt?: SortOrder
-    walletId?: SortOrder
+    senderWalletId?: SortOrder
+    receiverWalletId?: SortOrder
+    effectedWalletId?: SortOrder
     _count?: TransactionCountOrderByAggregateInput
     _avg?: TransactionAvgOrderByAggregateInput
     _max?: TransactionMaxOrderByAggregateInput
@@ -4674,12 +4831,15 @@ export namespace Prisma {
     type?: EnumTransactionTypeWithAggregatesFilter<"Transaction"> | $Enums.TransactionType
     description?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Transaction"> | Date | string
-    walletId?: StringWithAggregatesFilter<"Transaction"> | string
+    senderWalletId?: StringWithAggregatesFilter<"Transaction"> | string
+    receiverWalletId?: StringWithAggregatesFilter<"Transaction"> | string
+    effectedWalletId?: StringWithAggregatesFilter<"Transaction"> | string
   }
 
   export type UserCreateInput = {
     id?: string
     email: string
+    alias: string
     password: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -4689,6 +4849,7 @@ export namespace Prisma {
   export type UserUncheckedCreateInput = {
     id?: string
     email: string
+    alias: string
     password: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -4698,6 +4859,7 @@ export namespace Prisma {
   export type UserUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    alias?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4707,6 +4869,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    alias?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4716,6 +4879,7 @@ export namespace Prisma {
   export type UserCreateManyInput = {
     id?: string
     email: string
+    alias: string
     password: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -4724,6 +4888,7 @@ export namespace Prisma {
   export type UserUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    alias?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4732,6 +4897,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    alias?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4741,28 +4907,36 @@ export namespace Prisma {
     id?: string
     balance?: number
     user: UserCreateNestedOneWithoutWalletInput
-    transactions?: TransactionCreateNestedManyWithoutWalletInput
+    initiatedTransactions?: TransactionCreateNestedManyWithoutSenderWalletInput
+    receivedTransactions?: TransactionCreateNestedManyWithoutReceiverWalletInput
+    allTransactions?: TransactionCreateNestedManyWithoutEffectedWalletInput
   }
 
   export type WalletUncheckedCreateInput = {
     id?: string
     balance?: number
     userId: string
-    transactions?: TransactionUncheckedCreateNestedManyWithoutWalletInput
+    initiatedTransactions?: TransactionUncheckedCreateNestedManyWithoutSenderWalletInput
+    receivedTransactions?: TransactionUncheckedCreateNestedManyWithoutReceiverWalletInput
+    allTransactions?: TransactionUncheckedCreateNestedManyWithoutEffectedWalletInput
   }
 
   export type WalletUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     balance?: FloatFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutWalletNestedInput
-    transactions?: TransactionUpdateManyWithoutWalletNestedInput
+    initiatedTransactions?: TransactionUpdateManyWithoutSenderWalletNestedInput
+    receivedTransactions?: TransactionUpdateManyWithoutReceiverWalletNestedInput
+    allTransactions?: TransactionUpdateManyWithoutEffectedWalletNestedInput
   }
 
   export type WalletUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     balance?: FloatFieldUpdateOperationsInput | number
     userId?: StringFieldUpdateOperationsInput | string
-    transactions?: TransactionUncheckedUpdateManyWithoutWalletNestedInput
+    initiatedTransactions?: TransactionUncheckedUpdateManyWithoutSenderWalletNestedInput
+    receivedTransactions?: TransactionUncheckedUpdateManyWithoutReceiverWalletNestedInput
+    allTransactions?: TransactionUncheckedUpdateManyWithoutEffectedWalletNestedInput
   }
 
   export type WalletCreateManyInput = {
@@ -4788,7 +4962,9 @@ export namespace Prisma {
     type: $Enums.TransactionType
     description?: string | null
     createdAt?: Date | string
-    wallet: WalletCreateNestedOneWithoutTransactionsInput
+    senderWallet: WalletCreateNestedOneWithoutInitiatedTransactionsInput
+    receiverWallet: WalletCreateNestedOneWithoutReceivedTransactionsInput
+    effectedWallet: WalletCreateNestedOneWithoutAllTransactionsInput
   }
 
   export type TransactionUncheckedCreateInput = {
@@ -4797,7 +4973,9 @@ export namespace Prisma {
     type: $Enums.TransactionType
     description?: string | null
     createdAt?: Date | string
-    walletId: string
+    senderWalletId: string
+    receiverWalletId: string
+    effectedWalletId: string
   }
 
   export type TransactionUpdateInput = {
@@ -4806,7 +4984,9 @@ export namespace Prisma {
     type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    wallet?: WalletUpdateOneRequiredWithoutTransactionsNestedInput
+    senderWallet?: WalletUpdateOneRequiredWithoutInitiatedTransactionsNestedInput
+    receiverWallet?: WalletUpdateOneRequiredWithoutReceivedTransactionsNestedInput
+    effectedWallet?: WalletUpdateOneRequiredWithoutAllTransactionsNestedInput
   }
 
   export type TransactionUncheckedUpdateInput = {
@@ -4815,7 +4995,9 @@ export namespace Prisma {
     type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    walletId?: StringFieldUpdateOperationsInput | string
+    senderWalletId?: StringFieldUpdateOperationsInput | string
+    receiverWalletId?: StringFieldUpdateOperationsInput | string
+    effectedWalletId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TransactionCreateManyInput = {
@@ -4824,7 +5006,9 @@ export namespace Prisma {
     type: $Enums.TransactionType
     description?: string | null
     createdAt?: Date | string
-    walletId: string
+    senderWalletId: string
+    receiverWalletId: string
+    effectedWalletId: string
   }
 
   export type TransactionUpdateManyMutationInput = {
@@ -4841,7 +5025,9 @@ export namespace Prisma {
     type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    walletId?: StringFieldUpdateOperationsInput | string
+    senderWalletId?: StringFieldUpdateOperationsInput | string
+    receiverWalletId?: StringFieldUpdateOperationsInput | string
+    effectedWalletId?: StringFieldUpdateOperationsInput | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -4878,6 +5064,7 @@ export namespace Prisma {
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
+    alias?: SortOrder
     password?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -4886,6 +5073,7 @@ export namespace Prisma {
   export type UserMaxOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
+    alias?: SortOrder
     password?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -4894,6 +5082,7 @@ export namespace Prisma {
   export type UserMinOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
+    alias?: SortOrder
     password?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -5037,7 +5226,9 @@ export namespace Prisma {
     type?: SortOrder
     description?: SortOrder
     createdAt?: SortOrder
-    walletId?: SortOrder
+    senderWalletId?: SortOrder
+    receiverWalletId?: SortOrder
+    effectedWalletId?: SortOrder
   }
 
   export type TransactionAvgOrderByAggregateInput = {
@@ -5050,7 +5241,9 @@ export namespace Prisma {
     type?: SortOrder
     description?: SortOrder
     createdAt?: SortOrder
-    walletId?: SortOrder
+    senderWalletId?: SortOrder
+    receiverWalletId?: SortOrder
+    effectedWalletId?: SortOrder
   }
 
   export type TransactionMinOrderByAggregateInput = {
@@ -5059,7 +5252,9 @@ export namespace Prisma {
     type?: SortOrder
     description?: SortOrder
     createdAt?: SortOrder
-    walletId?: SortOrder
+    senderWalletId?: SortOrder
+    receiverWalletId?: SortOrder
+    effectedWalletId?: SortOrder
   }
 
   export type TransactionSumOrderByAggregateInput = {
@@ -5140,17 +5335,45 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type TransactionCreateNestedManyWithoutWalletInput = {
-    create?: XOR<TransactionCreateWithoutWalletInput, TransactionUncheckedCreateWithoutWalletInput> | TransactionCreateWithoutWalletInput[] | TransactionUncheckedCreateWithoutWalletInput[]
-    connectOrCreate?: TransactionCreateOrConnectWithoutWalletInput | TransactionCreateOrConnectWithoutWalletInput[]
-    createMany?: TransactionCreateManyWalletInputEnvelope
+  export type TransactionCreateNestedManyWithoutSenderWalletInput = {
+    create?: XOR<TransactionCreateWithoutSenderWalletInput, TransactionUncheckedCreateWithoutSenderWalletInput> | TransactionCreateWithoutSenderWalletInput[] | TransactionUncheckedCreateWithoutSenderWalletInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutSenderWalletInput | TransactionCreateOrConnectWithoutSenderWalletInput[]
+    createMany?: TransactionCreateManySenderWalletInputEnvelope
     connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
   }
 
-  export type TransactionUncheckedCreateNestedManyWithoutWalletInput = {
-    create?: XOR<TransactionCreateWithoutWalletInput, TransactionUncheckedCreateWithoutWalletInput> | TransactionCreateWithoutWalletInput[] | TransactionUncheckedCreateWithoutWalletInput[]
-    connectOrCreate?: TransactionCreateOrConnectWithoutWalletInput | TransactionCreateOrConnectWithoutWalletInput[]
-    createMany?: TransactionCreateManyWalletInputEnvelope
+  export type TransactionCreateNestedManyWithoutReceiverWalletInput = {
+    create?: XOR<TransactionCreateWithoutReceiverWalletInput, TransactionUncheckedCreateWithoutReceiverWalletInput> | TransactionCreateWithoutReceiverWalletInput[] | TransactionUncheckedCreateWithoutReceiverWalletInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutReceiverWalletInput | TransactionCreateOrConnectWithoutReceiverWalletInput[]
+    createMany?: TransactionCreateManyReceiverWalletInputEnvelope
+    connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+  }
+
+  export type TransactionCreateNestedManyWithoutEffectedWalletInput = {
+    create?: XOR<TransactionCreateWithoutEffectedWalletInput, TransactionUncheckedCreateWithoutEffectedWalletInput> | TransactionCreateWithoutEffectedWalletInput[] | TransactionUncheckedCreateWithoutEffectedWalletInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutEffectedWalletInput | TransactionCreateOrConnectWithoutEffectedWalletInput[]
+    createMany?: TransactionCreateManyEffectedWalletInputEnvelope
+    connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+  }
+
+  export type TransactionUncheckedCreateNestedManyWithoutSenderWalletInput = {
+    create?: XOR<TransactionCreateWithoutSenderWalletInput, TransactionUncheckedCreateWithoutSenderWalletInput> | TransactionCreateWithoutSenderWalletInput[] | TransactionUncheckedCreateWithoutSenderWalletInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutSenderWalletInput | TransactionCreateOrConnectWithoutSenderWalletInput[]
+    createMany?: TransactionCreateManySenderWalletInputEnvelope
+    connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+  }
+
+  export type TransactionUncheckedCreateNestedManyWithoutReceiverWalletInput = {
+    create?: XOR<TransactionCreateWithoutReceiverWalletInput, TransactionUncheckedCreateWithoutReceiverWalletInput> | TransactionCreateWithoutReceiverWalletInput[] | TransactionUncheckedCreateWithoutReceiverWalletInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutReceiverWalletInput | TransactionCreateOrConnectWithoutReceiverWalletInput[]
+    createMany?: TransactionCreateManyReceiverWalletInputEnvelope
+    connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+  }
+
+  export type TransactionUncheckedCreateNestedManyWithoutEffectedWalletInput = {
+    create?: XOR<TransactionCreateWithoutEffectedWalletInput, TransactionUncheckedCreateWithoutEffectedWalletInput> | TransactionCreateWithoutEffectedWalletInput[] | TransactionUncheckedCreateWithoutEffectedWalletInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutEffectedWalletInput | TransactionCreateOrConnectWithoutEffectedWalletInput[]
+    createMany?: TransactionCreateManyEffectedWalletInputEnvelope
     connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
   }
 
@@ -5170,37 +5393,105 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutWalletInput, UserUpdateWithoutWalletInput>, UserUncheckedUpdateWithoutWalletInput>
   }
 
-  export type TransactionUpdateManyWithoutWalletNestedInput = {
-    create?: XOR<TransactionCreateWithoutWalletInput, TransactionUncheckedCreateWithoutWalletInput> | TransactionCreateWithoutWalletInput[] | TransactionUncheckedCreateWithoutWalletInput[]
-    connectOrCreate?: TransactionCreateOrConnectWithoutWalletInput | TransactionCreateOrConnectWithoutWalletInput[]
-    upsert?: TransactionUpsertWithWhereUniqueWithoutWalletInput | TransactionUpsertWithWhereUniqueWithoutWalletInput[]
-    createMany?: TransactionCreateManyWalletInputEnvelope
+  export type TransactionUpdateManyWithoutSenderWalletNestedInput = {
+    create?: XOR<TransactionCreateWithoutSenderWalletInput, TransactionUncheckedCreateWithoutSenderWalletInput> | TransactionCreateWithoutSenderWalletInput[] | TransactionUncheckedCreateWithoutSenderWalletInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutSenderWalletInput | TransactionCreateOrConnectWithoutSenderWalletInput[]
+    upsert?: TransactionUpsertWithWhereUniqueWithoutSenderWalletInput | TransactionUpsertWithWhereUniqueWithoutSenderWalletInput[]
+    createMany?: TransactionCreateManySenderWalletInputEnvelope
     set?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
     disconnect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
     delete?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
     connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
-    update?: TransactionUpdateWithWhereUniqueWithoutWalletInput | TransactionUpdateWithWhereUniqueWithoutWalletInput[]
-    updateMany?: TransactionUpdateManyWithWhereWithoutWalletInput | TransactionUpdateManyWithWhereWithoutWalletInput[]
+    update?: TransactionUpdateWithWhereUniqueWithoutSenderWalletInput | TransactionUpdateWithWhereUniqueWithoutSenderWalletInput[]
+    updateMany?: TransactionUpdateManyWithWhereWithoutSenderWalletInput | TransactionUpdateManyWithWhereWithoutSenderWalletInput[]
     deleteMany?: TransactionScalarWhereInput | TransactionScalarWhereInput[]
   }
 
-  export type TransactionUncheckedUpdateManyWithoutWalletNestedInput = {
-    create?: XOR<TransactionCreateWithoutWalletInput, TransactionUncheckedCreateWithoutWalletInput> | TransactionCreateWithoutWalletInput[] | TransactionUncheckedCreateWithoutWalletInput[]
-    connectOrCreate?: TransactionCreateOrConnectWithoutWalletInput | TransactionCreateOrConnectWithoutWalletInput[]
-    upsert?: TransactionUpsertWithWhereUniqueWithoutWalletInput | TransactionUpsertWithWhereUniqueWithoutWalletInput[]
-    createMany?: TransactionCreateManyWalletInputEnvelope
+  export type TransactionUpdateManyWithoutReceiverWalletNestedInput = {
+    create?: XOR<TransactionCreateWithoutReceiverWalletInput, TransactionUncheckedCreateWithoutReceiverWalletInput> | TransactionCreateWithoutReceiverWalletInput[] | TransactionUncheckedCreateWithoutReceiverWalletInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutReceiverWalletInput | TransactionCreateOrConnectWithoutReceiverWalletInput[]
+    upsert?: TransactionUpsertWithWhereUniqueWithoutReceiverWalletInput | TransactionUpsertWithWhereUniqueWithoutReceiverWalletInput[]
+    createMany?: TransactionCreateManyReceiverWalletInputEnvelope
     set?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
     disconnect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
     delete?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
     connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
-    update?: TransactionUpdateWithWhereUniqueWithoutWalletInput | TransactionUpdateWithWhereUniqueWithoutWalletInput[]
-    updateMany?: TransactionUpdateManyWithWhereWithoutWalletInput | TransactionUpdateManyWithWhereWithoutWalletInput[]
+    update?: TransactionUpdateWithWhereUniqueWithoutReceiverWalletInput | TransactionUpdateWithWhereUniqueWithoutReceiverWalletInput[]
+    updateMany?: TransactionUpdateManyWithWhereWithoutReceiverWalletInput | TransactionUpdateManyWithWhereWithoutReceiverWalletInput[]
     deleteMany?: TransactionScalarWhereInput | TransactionScalarWhereInput[]
   }
 
-  export type WalletCreateNestedOneWithoutTransactionsInput = {
-    create?: XOR<WalletCreateWithoutTransactionsInput, WalletUncheckedCreateWithoutTransactionsInput>
-    connectOrCreate?: WalletCreateOrConnectWithoutTransactionsInput
+  export type TransactionUpdateManyWithoutEffectedWalletNestedInput = {
+    create?: XOR<TransactionCreateWithoutEffectedWalletInput, TransactionUncheckedCreateWithoutEffectedWalletInput> | TransactionCreateWithoutEffectedWalletInput[] | TransactionUncheckedCreateWithoutEffectedWalletInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutEffectedWalletInput | TransactionCreateOrConnectWithoutEffectedWalletInput[]
+    upsert?: TransactionUpsertWithWhereUniqueWithoutEffectedWalletInput | TransactionUpsertWithWhereUniqueWithoutEffectedWalletInput[]
+    createMany?: TransactionCreateManyEffectedWalletInputEnvelope
+    set?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    disconnect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    delete?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    update?: TransactionUpdateWithWhereUniqueWithoutEffectedWalletInput | TransactionUpdateWithWhereUniqueWithoutEffectedWalletInput[]
+    updateMany?: TransactionUpdateManyWithWhereWithoutEffectedWalletInput | TransactionUpdateManyWithWhereWithoutEffectedWalletInput[]
+    deleteMany?: TransactionScalarWhereInput | TransactionScalarWhereInput[]
+  }
+
+  export type TransactionUncheckedUpdateManyWithoutSenderWalletNestedInput = {
+    create?: XOR<TransactionCreateWithoutSenderWalletInput, TransactionUncheckedCreateWithoutSenderWalletInput> | TransactionCreateWithoutSenderWalletInput[] | TransactionUncheckedCreateWithoutSenderWalletInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutSenderWalletInput | TransactionCreateOrConnectWithoutSenderWalletInput[]
+    upsert?: TransactionUpsertWithWhereUniqueWithoutSenderWalletInput | TransactionUpsertWithWhereUniqueWithoutSenderWalletInput[]
+    createMany?: TransactionCreateManySenderWalletInputEnvelope
+    set?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    disconnect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    delete?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    update?: TransactionUpdateWithWhereUniqueWithoutSenderWalletInput | TransactionUpdateWithWhereUniqueWithoutSenderWalletInput[]
+    updateMany?: TransactionUpdateManyWithWhereWithoutSenderWalletInput | TransactionUpdateManyWithWhereWithoutSenderWalletInput[]
+    deleteMany?: TransactionScalarWhereInput | TransactionScalarWhereInput[]
+  }
+
+  export type TransactionUncheckedUpdateManyWithoutReceiverWalletNestedInput = {
+    create?: XOR<TransactionCreateWithoutReceiverWalletInput, TransactionUncheckedCreateWithoutReceiverWalletInput> | TransactionCreateWithoutReceiverWalletInput[] | TransactionUncheckedCreateWithoutReceiverWalletInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutReceiverWalletInput | TransactionCreateOrConnectWithoutReceiverWalletInput[]
+    upsert?: TransactionUpsertWithWhereUniqueWithoutReceiverWalletInput | TransactionUpsertWithWhereUniqueWithoutReceiverWalletInput[]
+    createMany?: TransactionCreateManyReceiverWalletInputEnvelope
+    set?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    disconnect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    delete?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    update?: TransactionUpdateWithWhereUniqueWithoutReceiverWalletInput | TransactionUpdateWithWhereUniqueWithoutReceiverWalletInput[]
+    updateMany?: TransactionUpdateManyWithWhereWithoutReceiverWalletInput | TransactionUpdateManyWithWhereWithoutReceiverWalletInput[]
+    deleteMany?: TransactionScalarWhereInput | TransactionScalarWhereInput[]
+  }
+
+  export type TransactionUncheckedUpdateManyWithoutEffectedWalletNestedInput = {
+    create?: XOR<TransactionCreateWithoutEffectedWalletInput, TransactionUncheckedCreateWithoutEffectedWalletInput> | TransactionCreateWithoutEffectedWalletInput[] | TransactionUncheckedCreateWithoutEffectedWalletInput[]
+    connectOrCreate?: TransactionCreateOrConnectWithoutEffectedWalletInput | TransactionCreateOrConnectWithoutEffectedWalletInput[]
+    upsert?: TransactionUpsertWithWhereUniqueWithoutEffectedWalletInput | TransactionUpsertWithWhereUniqueWithoutEffectedWalletInput[]
+    createMany?: TransactionCreateManyEffectedWalletInputEnvelope
+    set?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    disconnect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    delete?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    connect?: TransactionWhereUniqueInput | TransactionWhereUniqueInput[]
+    update?: TransactionUpdateWithWhereUniqueWithoutEffectedWalletInput | TransactionUpdateWithWhereUniqueWithoutEffectedWalletInput[]
+    updateMany?: TransactionUpdateManyWithWhereWithoutEffectedWalletInput | TransactionUpdateManyWithWhereWithoutEffectedWalletInput[]
+    deleteMany?: TransactionScalarWhereInput | TransactionScalarWhereInput[]
+  }
+
+  export type WalletCreateNestedOneWithoutInitiatedTransactionsInput = {
+    create?: XOR<WalletCreateWithoutInitiatedTransactionsInput, WalletUncheckedCreateWithoutInitiatedTransactionsInput>
+    connectOrCreate?: WalletCreateOrConnectWithoutInitiatedTransactionsInput
+    connect?: WalletWhereUniqueInput
+  }
+
+  export type WalletCreateNestedOneWithoutReceivedTransactionsInput = {
+    create?: XOR<WalletCreateWithoutReceivedTransactionsInput, WalletUncheckedCreateWithoutReceivedTransactionsInput>
+    connectOrCreate?: WalletCreateOrConnectWithoutReceivedTransactionsInput
+    connect?: WalletWhereUniqueInput
+  }
+
+  export type WalletCreateNestedOneWithoutAllTransactionsInput = {
+    create?: XOR<WalletCreateWithoutAllTransactionsInput, WalletUncheckedCreateWithoutAllTransactionsInput>
+    connectOrCreate?: WalletCreateOrConnectWithoutAllTransactionsInput
     connect?: WalletWhereUniqueInput
   }
 
@@ -5212,12 +5503,28 @@ export namespace Prisma {
     set?: string | null
   }
 
-  export type WalletUpdateOneRequiredWithoutTransactionsNestedInput = {
-    create?: XOR<WalletCreateWithoutTransactionsInput, WalletUncheckedCreateWithoutTransactionsInput>
-    connectOrCreate?: WalletCreateOrConnectWithoutTransactionsInput
-    upsert?: WalletUpsertWithoutTransactionsInput
+  export type WalletUpdateOneRequiredWithoutInitiatedTransactionsNestedInput = {
+    create?: XOR<WalletCreateWithoutInitiatedTransactionsInput, WalletUncheckedCreateWithoutInitiatedTransactionsInput>
+    connectOrCreate?: WalletCreateOrConnectWithoutInitiatedTransactionsInput
+    upsert?: WalletUpsertWithoutInitiatedTransactionsInput
     connect?: WalletWhereUniqueInput
-    update?: XOR<XOR<WalletUpdateToOneWithWhereWithoutTransactionsInput, WalletUpdateWithoutTransactionsInput>, WalletUncheckedUpdateWithoutTransactionsInput>
+    update?: XOR<XOR<WalletUpdateToOneWithWhereWithoutInitiatedTransactionsInput, WalletUpdateWithoutInitiatedTransactionsInput>, WalletUncheckedUpdateWithoutInitiatedTransactionsInput>
+  }
+
+  export type WalletUpdateOneRequiredWithoutReceivedTransactionsNestedInput = {
+    create?: XOR<WalletCreateWithoutReceivedTransactionsInput, WalletUncheckedCreateWithoutReceivedTransactionsInput>
+    connectOrCreate?: WalletCreateOrConnectWithoutReceivedTransactionsInput
+    upsert?: WalletUpsertWithoutReceivedTransactionsInput
+    connect?: WalletWhereUniqueInput
+    update?: XOR<XOR<WalletUpdateToOneWithWhereWithoutReceivedTransactionsInput, WalletUpdateWithoutReceivedTransactionsInput>, WalletUncheckedUpdateWithoutReceivedTransactionsInput>
+  }
+
+  export type WalletUpdateOneRequiredWithoutAllTransactionsNestedInput = {
+    create?: XOR<WalletCreateWithoutAllTransactionsInput, WalletUncheckedCreateWithoutAllTransactionsInput>
+    connectOrCreate?: WalletCreateOrConnectWithoutAllTransactionsInput
+    upsert?: WalletUpsertWithoutAllTransactionsInput
+    connect?: WalletWhereUniqueInput
+    update?: XOR<XOR<WalletUpdateToOneWithWhereWithoutAllTransactionsInput, WalletUpdateWithoutAllTransactionsInput>, WalletUncheckedUpdateWithoutAllTransactionsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -5376,13 +5683,17 @@ export namespace Prisma {
   export type WalletCreateWithoutUserInput = {
     id?: string
     balance?: number
-    transactions?: TransactionCreateNestedManyWithoutWalletInput
+    initiatedTransactions?: TransactionCreateNestedManyWithoutSenderWalletInput
+    receivedTransactions?: TransactionCreateNestedManyWithoutReceiverWalletInput
+    allTransactions?: TransactionCreateNestedManyWithoutEffectedWalletInput
   }
 
   export type WalletUncheckedCreateWithoutUserInput = {
     id?: string
     balance?: number
-    transactions?: TransactionUncheckedCreateNestedManyWithoutWalletInput
+    initiatedTransactions?: TransactionUncheckedCreateNestedManyWithoutSenderWalletInput
+    receivedTransactions?: TransactionUncheckedCreateNestedManyWithoutReceiverWalletInput
+    allTransactions?: TransactionUncheckedCreateNestedManyWithoutEffectedWalletInput
   }
 
   export type WalletCreateOrConnectWithoutUserInput = {
@@ -5404,18 +5715,23 @@ export namespace Prisma {
   export type WalletUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     balance?: FloatFieldUpdateOperationsInput | number
-    transactions?: TransactionUpdateManyWithoutWalletNestedInput
+    initiatedTransactions?: TransactionUpdateManyWithoutSenderWalletNestedInput
+    receivedTransactions?: TransactionUpdateManyWithoutReceiverWalletNestedInput
+    allTransactions?: TransactionUpdateManyWithoutEffectedWalletNestedInput
   }
 
   export type WalletUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     balance?: FloatFieldUpdateOperationsInput | number
-    transactions?: TransactionUncheckedUpdateManyWithoutWalletNestedInput
+    initiatedTransactions?: TransactionUncheckedUpdateManyWithoutSenderWalletNestedInput
+    receivedTransactions?: TransactionUncheckedUpdateManyWithoutReceiverWalletNestedInput
+    allTransactions?: TransactionUncheckedUpdateManyWithoutEffectedWalletNestedInput
   }
 
   export type UserCreateWithoutWalletInput = {
     id?: string
     email: string
+    alias: string
     password: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -5424,6 +5740,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutWalletInput = {
     id?: string
     email: string
+    alias: string
     password: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -5434,29 +5751,93 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutWalletInput, UserUncheckedCreateWithoutWalletInput>
   }
 
-  export type TransactionCreateWithoutWalletInput = {
+  export type TransactionCreateWithoutSenderWalletInput = {
     id?: string
     amount: number
     type: $Enums.TransactionType
     description?: string | null
     createdAt?: Date | string
+    receiverWallet: WalletCreateNestedOneWithoutReceivedTransactionsInput
+    effectedWallet: WalletCreateNestedOneWithoutAllTransactionsInput
   }
 
-  export type TransactionUncheckedCreateWithoutWalletInput = {
+  export type TransactionUncheckedCreateWithoutSenderWalletInput = {
     id?: string
     amount: number
     type: $Enums.TransactionType
     description?: string | null
     createdAt?: Date | string
+    receiverWalletId: string
+    effectedWalletId: string
   }
 
-  export type TransactionCreateOrConnectWithoutWalletInput = {
+  export type TransactionCreateOrConnectWithoutSenderWalletInput = {
     where: TransactionWhereUniqueInput
-    create: XOR<TransactionCreateWithoutWalletInput, TransactionUncheckedCreateWithoutWalletInput>
+    create: XOR<TransactionCreateWithoutSenderWalletInput, TransactionUncheckedCreateWithoutSenderWalletInput>
   }
 
-  export type TransactionCreateManyWalletInputEnvelope = {
-    data: TransactionCreateManyWalletInput | TransactionCreateManyWalletInput[]
+  export type TransactionCreateManySenderWalletInputEnvelope = {
+    data: TransactionCreateManySenderWalletInput | TransactionCreateManySenderWalletInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TransactionCreateWithoutReceiverWalletInput = {
+    id?: string
+    amount: number
+    type: $Enums.TransactionType
+    description?: string | null
+    createdAt?: Date | string
+    senderWallet: WalletCreateNestedOneWithoutInitiatedTransactionsInput
+    effectedWallet: WalletCreateNestedOneWithoutAllTransactionsInput
+  }
+
+  export type TransactionUncheckedCreateWithoutReceiverWalletInput = {
+    id?: string
+    amount: number
+    type: $Enums.TransactionType
+    description?: string | null
+    createdAt?: Date | string
+    senderWalletId: string
+    effectedWalletId: string
+  }
+
+  export type TransactionCreateOrConnectWithoutReceiverWalletInput = {
+    where: TransactionWhereUniqueInput
+    create: XOR<TransactionCreateWithoutReceiverWalletInput, TransactionUncheckedCreateWithoutReceiverWalletInput>
+  }
+
+  export type TransactionCreateManyReceiverWalletInputEnvelope = {
+    data: TransactionCreateManyReceiverWalletInput | TransactionCreateManyReceiverWalletInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type TransactionCreateWithoutEffectedWalletInput = {
+    id?: string
+    amount: number
+    type: $Enums.TransactionType
+    description?: string | null
+    createdAt?: Date | string
+    senderWallet: WalletCreateNestedOneWithoutInitiatedTransactionsInput
+    receiverWallet: WalletCreateNestedOneWithoutReceivedTransactionsInput
+  }
+
+  export type TransactionUncheckedCreateWithoutEffectedWalletInput = {
+    id?: string
+    amount: number
+    type: $Enums.TransactionType
+    description?: string | null
+    createdAt?: Date | string
+    senderWalletId: string
+    receiverWalletId: string
+  }
+
+  export type TransactionCreateOrConnectWithoutEffectedWalletInput = {
+    where: TransactionWhereUniqueInput
+    create: XOR<TransactionCreateWithoutEffectedWalletInput, TransactionUncheckedCreateWithoutEffectedWalletInput>
+  }
+
+  export type TransactionCreateManyEffectedWalletInputEnvelope = {
+    data: TransactionCreateManyEffectedWalletInput | TransactionCreateManyEffectedWalletInput[]
     skipDuplicates?: boolean
   }
 
@@ -5474,6 +5855,7 @@ export namespace Prisma {
   export type UserUpdateWithoutWalletInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    alias?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -5482,25 +5864,26 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutWalletInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    alias?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type TransactionUpsertWithWhereUniqueWithoutWalletInput = {
+  export type TransactionUpsertWithWhereUniqueWithoutSenderWalletInput = {
     where: TransactionWhereUniqueInput
-    update: XOR<TransactionUpdateWithoutWalletInput, TransactionUncheckedUpdateWithoutWalletInput>
-    create: XOR<TransactionCreateWithoutWalletInput, TransactionUncheckedCreateWithoutWalletInput>
+    update: XOR<TransactionUpdateWithoutSenderWalletInput, TransactionUncheckedUpdateWithoutSenderWalletInput>
+    create: XOR<TransactionCreateWithoutSenderWalletInput, TransactionUncheckedCreateWithoutSenderWalletInput>
   }
 
-  export type TransactionUpdateWithWhereUniqueWithoutWalletInput = {
+  export type TransactionUpdateWithWhereUniqueWithoutSenderWalletInput = {
     where: TransactionWhereUniqueInput
-    data: XOR<TransactionUpdateWithoutWalletInput, TransactionUncheckedUpdateWithoutWalletInput>
+    data: XOR<TransactionUpdateWithoutSenderWalletInput, TransactionUncheckedUpdateWithoutSenderWalletInput>
   }
 
-  export type TransactionUpdateManyWithWhereWithoutWalletInput = {
+  export type TransactionUpdateManyWithWhereWithoutSenderWalletInput = {
     where: TransactionScalarWhereInput
-    data: XOR<TransactionUpdateManyMutationInput, TransactionUncheckedUpdateManyWithoutWalletInput>
+    data: XOR<TransactionUpdateManyMutationInput, TransactionUncheckedUpdateManyWithoutSenderWalletInput>
   }
 
   export type TransactionScalarWhereInput = {
@@ -5512,79 +5895,305 @@ export namespace Prisma {
     type?: EnumTransactionTypeFilter<"Transaction"> | $Enums.TransactionType
     description?: StringNullableFilter<"Transaction"> | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
-    walletId?: StringFilter<"Transaction"> | string
+    senderWalletId?: StringFilter<"Transaction"> | string
+    receiverWalletId?: StringFilter<"Transaction"> | string
+    effectedWalletId?: StringFilter<"Transaction"> | string
   }
 
-  export type WalletCreateWithoutTransactionsInput = {
+  export type TransactionUpsertWithWhereUniqueWithoutReceiverWalletInput = {
+    where: TransactionWhereUniqueInput
+    update: XOR<TransactionUpdateWithoutReceiverWalletInput, TransactionUncheckedUpdateWithoutReceiverWalletInput>
+    create: XOR<TransactionCreateWithoutReceiverWalletInput, TransactionUncheckedCreateWithoutReceiverWalletInput>
+  }
+
+  export type TransactionUpdateWithWhereUniqueWithoutReceiverWalletInput = {
+    where: TransactionWhereUniqueInput
+    data: XOR<TransactionUpdateWithoutReceiverWalletInput, TransactionUncheckedUpdateWithoutReceiverWalletInput>
+  }
+
+  export type TransactionUpdateManyWithWhereWithoutReceiverWalletInput = {
+    where: TransactionScalarWhereInput
+    data: XOR<TransactionUpdateManyMutationInput, TransactionUncheckedUpdateManyWithoutReceiverWalletInput>
+  }
+
+  export type TransactionUpsertWithWhereUniqueWithoutEffectedWalletInput = {
+    where: TransactionWhereUniqueInput
+    update: XOR<TransactionUpdateWithoutEffectedWalletInput, TransactionUncheckedUpdateWithoutEffectedWalletInput>
+    create: XOR<TransactionCreateWithoutEffectedWalletInput, TransactionUncheckedCreateWithoutEffectedWalletInput>
+  }
+
+  export type TransactionUpdateWithWhereUniqueWithoutEffectedWalletInput = {
+    where: TransactionWhereUniqueInput
+    data: XOR<TransactionUpdateWithoutEffectedWalletInput, TransactionUncheckedUpdateWithoutEffectedWalletInput>
+  }
+
+  export type TransactionUpdateManyWithWhereWithoutEffectedWalletInput = {
+    where: TransactionScalarWhereInput
+    data: XOR<TransactionUpdateManyMutationInput, TransactionUncheckedUpdateManyWithoutEffectedWalletInput>
+  }
+
+  export type WalletCreateWithoutInitiatedTransactionsInput = {
     id?: string
     balance?: number
     user: UserCreateNestedOneWithoutWalletInput
+    receivedTransactions?: TransactionCreateNestedManyWithoutReceiverWalletInput
+    allTransactions?: TransactionCreateNestedManyWithoutEffectedWalletInput
   }
 
-  export type WalletUncheckedCreateWithoutTransactionsInput = {
+  export type WalletUncheckedCreateWithoutInitiatedTransactionsInput = {
     id?: string
     balance?: number
     userId: string
+    receivedTransactions?: TransactionUncheckedCreateNestedManyWithoutReceiverWalletInput
+    allTransactions?: TransactionUncheckedCreateNestedManyWithoutEffectedWalletInput
   }
 
-  export type WalletCreateOrConnectWithoutTransactionsInput = {
+  export type WalletCreateOrConnectWithoutInitiatedTransactionsInput = {
     where: WalletWhereUniqueInput
-    create: XOR<WalletCreateWithoutTransactionsInput, WalletUncheckedCreateWithoutTransactionsInput>
+    create: XOR<WalletCreateWithoutInitiatedTransactionsInput, WalletUncheckedCreateWithoutInitiatedTransactionsInput>
   }
 
-  export type WalletUpsertWithoutTransactionsInput = {
-    update: XOR<WalletUpdateWithoutTransactionsInput, WalletUncheckedUpdateWithoutTransactionsInput>
-    create: XOR<WalletCreateWithoutTransactionsInput, WalletUncheckedCreateWithoutTransactionsInput>
+  export type WalletCreateWithoutReceivedTransactionsInput = {
+    id?: string
+    balance?: number
+    user: UserCreateNestedOneWithoutWalletInput
+    initiatedTransactions?: TransactionCreateNestedManyWithoutSenderWalletInput
+    allTransactions?: TransactionCreateNestedManyWithoutEffectedWalletInput
+  }
+
+  export type WalletUncheckedCreateWithoutReceivedTransactionsInput = {
+    id?: string
+    balance?: number
+    userId: string
+    initiatedTransactions?: TransactionUncheckedCreateNestedManyWithoutSenderWalletInput
+    allTransactions?: TransactionUncheckedCreateNestedManyWithoutEffectedWalletInput
+  }
+
+  export type WalletCreateOrConnectWithoutReceivedTransactionsInput = {
+    where: WalletWhereUniqueInput
+    create: XOR<WalletCreateWithoutReceivedTransactionsInput, WalletUncheckedCreateWithoutReceivedTransactionsInput>
+  }
+
+  export type WalletCreateWithoutAllTransactionsInput = {
+    id?: string
+    balance?: number
+    user: UserCreateNestedOneWithoutWalletInput
+    initiatedTransactions?: TransactionCreateNestedManyWithoutSenderWalletInput
+    receivedTransactions?: TransactionCreateNestedManyWithoutReceiverWalletInput
+  }
+
+  export type WalletUncheckedCreateWithoutAllTransactionsInput = {
+    id?: string
+    balance?: number
+    userId: string
+    initiatedTransactions?: TransactionUncheckedCreateNestedManyWithoutSenderWalletInput
+    receivedTransactions?: TransactionUncheckedCreateNestedManyWithoutReceiverWalletInput
+  }
+
+  export type WalletCreateOrConnectWithoutAllTransactionsInput = {
+    where: WalletWhereUniqueInput
+    create: XOR<WalletCreateWithoutAllTransactionsInput, WalletUncheckedCreateWithoutAllTransactionsInput>
+  }
+
+  export type WalletUpsertWithoutInitiatedTransactionsInput = {
+    update: XOR<WalletUpdateWithoutInitiatedTransactionsInput, WalletUncheckedUpdateWithoutInitiatedTransactionsInput>
+    create: XOR<WalletCreateWithoutInitiatedTransactionsInput, WalletUncheckedCreateWithoutInitiatedTransactionsInput>
     where?: WalletWhereInput
   }
 
-  export type WalletUpdateToOneWithWhereWithoutTransactionsInput = {
+  export type WalletUpdateToOneWithWhereWithoutInitiatedTransactionsInput = {
     where?: WalletWhereInput
-    data: XOR<WalletUpdateWithoutTransactionsInput, WalletUncheckedUpdateWithoutTransactionsInput>
+    data: XOR<WalletUpdateWithoutInitiatedTransactionsInput, WalletUncheckedUpdateWithoutInitiatedTransactionsInput>
   }
 
-  export type WalletUpdateWithoutTransactionsInput = {
+  export type WalletUpdateWithoutInitiatedTransactionsInput = {
     id?: StringFieldUpdateOperationsInput | string
     balance?: FloatFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutWalletNestedInput
+    receivedTransactions?: TransactionUpdateManyWithoutReceiverWalletNestedInput
+    allTransactions?: TransactionUpdateManyWithoutEffectedWalletNestedInput
   }
 
-  export type WalletUncheckedUpdateWithoutTransactionsInput = {
+  export type WalletUncheckedUpdateWithoutInitiatedTransactionsInput = {
     id?: StringFieldUpdateOperationsInput | string
     balance?: FloatFieldUpdateOperationsInput | number
     userId?: StringFieldUpdateOperationsInput | string
+    receivedTransactions?: TransactionUncheckedUpdateManyWithoutReceiverWalletNestedInput
+    allTransactions?: TransactionUncheckedUpdateManyWithoutEffectedWalletNestedInput
   }
 
-  export type TransactionCreateManyWalletInput = {
+  export type WalletUpsertWithoutReceivedTransactionsInput = {
+    update: XOR<WalletUpdateWithoutReceivedTransactionsInput, WalletUncheckedUpdateWithoutReceivedTransactionsInput>
+    create: XOR<WalletCreateWithoutReceivedTransactionsInput, WalletUncheckedCreateWithoutReceivedTransactionsInput>
+    where?: WalletWhereInput
+  }
+
+  export type WalletUpdateToOneWithWhereWithoutReceivedTransactionsInput = {
+    where?: WalletWhereInput
+    data: XOR<WalletUpdateWithoutReceivedTransactionsInput, WalletUncheckedUpdateWithoutReceivedTransactionsInput>
+  }
+
+  export type WalletUpdateWithoutReceivedTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    balance?: FloatFieldUpdateOperationsInput | number
+    user?: UserUpdateOneRequiredWithoutWalletNestedInput
+    initiatedTransactions?: TransactionUpdateManyWithoutSenderWalletNestedInput
+    allTransactions?: TransactionUpdateManyWithoutEffectedWalletNestedInput
+  }
+
+  export type WalletUncheckedUpdateWithoutReceivedTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    balance?: FloatFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
+    initiatedTransactions?: TransactionUncheckedUpdateManyWithoutSenderWalletNestedInput
+    allTransactions?: TransactionUncheckedUpdateManyWithoutEffectedWalletNestedInput
+  }
+
+  export type WalletUpsertWithoutAllTransactionsInput = {
+    update: XOR<WalletUpdateWithoutAllTransactionsInput, WalletUncheckedUpdateWithoutAllTransactionsInput>
+    create: XOR<WalletCreateWithoutAllTransactionsInput, WalletUncheckedCreateWithoutAllTransactionsInput>
+    where?: WalletWhereInput
+  }
+
+  export type WalletUpdateToOneWithWhereWithoutAllTransactionsInput = {
+    where?: WalletWhereInput
+    data: XOR<WalletUpdateWithoutAllTransactionsInput, WalletUncheckedUpdateWithoutAllTransactionsInput>
+  }
+
+  export type WalletUpdateWithoutAllTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    balance?: FloatFieldUpdateOperationsInput | number
+    user?: UserUpdateOneRequiredWithoutWalletNestedInput
+    initiatedTransactions?: TransactionUpdateManyWithoutSenderWalletNestedInput
+    receivedTransactions?: TransactionUpdateManyWithoutReceiverWalletNestedInput
+  }
+
+  export type WalletUncheckedUpdateWithoutAllTransactionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    balance?: FloatFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
+    initiatedTransactions?: TransactionUncheckedUpdateManyWithoutSenderWalletNestedInput
+    receivedTransactions?: TransactionUncheckedUpdateManyWithoutReceiverWalletNestedInput
+  }
+
+  export type TransactionCreateManySenderWalletInput = {
     id?: string
     amount: number
     type: $Enums.TransactionType
     description?: string | null
     createdAt?: Date | string
+    receiverWalletId: string
+    effectedWalletId: string
   }
 
-  export type TransactionUpdateWithoutWalletInput = {
+  export type TransactionCreateManyReceiverWalletInput = {
+    id?: string
+    amount: number
+    type: $Enums.TransactionType
+    description?: string | null
+    createdAt?: Date | string
+    senderWalletId: string
+    effectedWalletId: string
+  }
+
+  export type TransactionCreateManyEffectedWalletInput = {
+    id?: string
+    amount: number
+    type: $Enums.TransactionType
+    description?: string | null
+    createdAt?: Date | string
+    senderWalletId: string
+    receiverWalletId: string
+  }
+
+  export type TransactionUpdateWithoutSenderWalletInput = {
     id?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    receiverWallet?: WalletUpdateOneRequiredWithoutReceivedTransactionsNestedInput
+    effectedWallet?: WalletUpdateOneRequiredWithoutAllTransactionsNestedInput
   }
 
-  export type TransactionUncheckedUpdateWithoutWalletInput = {
+  export type TransactionUncheckedUpdateWithoutSenderWalletInput = {
     id?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    receiverWalletId?: StringFieldUpdateOperationsInput | string
+    effectedWalletId?: StringFieldUpdateOperationsInput | string
   }
 
-  export type TransactionUncheckedUpdateManyWithoutWalletInput = {
+  export type TransactionUncheckedUpdateManyWithoutSenderWalletInput = {
     id?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    receiverWalletId?: StringFieldUpdateOperationsInput | string
+    effectedWalletId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type TransactionUpdateWithoutReceiverWalletInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    senderWallet?: WalletUpdateOneRequiredWithoutInitiatedTransactionsNestedInput
+    effectedWallet?: WalletUpdateOneRequiredWithoutAllTransactionsNestedInput
+  }
+
+  export type TransactionUncheckedUpdateWithoutReceiverWalletInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    senderWalletId?: StringFieldUpdateOperationsInput | string
+    effectedWalletId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type TransactionUncheckedUpdateManyWithoutReceiverWalletInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    senderWalletId?: StringFieldUpdateOperationsInput | string
+    effectedWalletId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type TransactionUpdateWithoutEffectedWalletInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    senderWallet?: WalletUpdateOneRequiredWithoutInitiatedTransactionsNestedInput
+    receiverWallet?: WalletUpdateOneRequiredWithoutReceivedTransactionsNestedInput
+  }
+
+  export type TransactionUncheckedUpdateWithoutEffectedWalletInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    senderWalletId?: StringFieldUpdateOperationsInput | string
+    receiverWalletId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type TransactionUncheckedUpdateManyWithoutEffectedWalletInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: FloatFieldUpdateOperationsInput | number
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    senderWalletId?: StringFieldUpdateOperationsInput | string
+    receiverWalletId?: StringFieldUpdateOperationsInput | string
   }
 
 
