@@ -6,10 +6,15 @@ export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
-  async onModuleInit() {
-    await (this.$connect as () => Promise<void>)();
+  constructor() {
+    super();
   }
+
+  async onModuleInit() {
+    await (this.$connect as any)();
+  }
+
   async onModuleDestroy() {
-    await (this.$disconnect as () => Promise<void>)();
+    await (this.$disconnect as any)();
   }
 }

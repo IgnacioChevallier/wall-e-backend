@@ -4,7 +4,6 @@ import { WalletService } from './wallet.service';
 
 describe('WalletController', () => {
   let controller: WalletController;
-  let service: WalletService;
 
   const mockWalletService = {
     getWalletBalance: jest.fn(),
@@ -23,7 +22,6 @@ describe('WalletController', () => {
     }).compile();
 
     controller = module.get<WalletController>(WalletController);
-    service = module.get<WalletService>(WalletService);
   });
 
   afterEach(() => {

@@ -5,7 +5,6 @@ import { NotFoundException } from '@nestjs/common';
 
 describe('WalletService', () => {
   let service: WalletService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     wallet: {
@@ -25,7 +24,6 @@ describe('WalletService', () => {
     }).compile();
 
     service = module.get<WalletService>(WalletService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {

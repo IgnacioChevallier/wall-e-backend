@@ -2,31 +2,32 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { Transaction, TransactionType } from '../../generated/prisma'; // Assuming TransactionType is also generated
+import { Transaction, Prisma } from '../../generated/prisma';
 
 @Injectable()
 export class TransactionsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
+  async create(
+    createTransactionDto: CreateTransactionDto,
+  ): Promise<Transaction> {
     const { amount, type, walletId, description } = createTransactionDto;
-    return this.prisma.transaction.create({
+    return await (this.prisma.transaction as any).create({
       data: {
         amount,
         type,
         walletId,
         description,
-        // wallet: { connect: { id: walletId } } // Alternative way to connect to wallet if needed
       },
     });
   }
 
   async findAll(): Promise<Transaction[]> {
-    return this.prisma.transaction.findMany();
+    return await (this.prisma.transaction as any).findMany();
   }
 
   async findOne(id: string): Promise<Transaction> {
-    const transaction = await this.prisma.transaction.findUnique({
+    const transaction = await (this.prisma.transaction as any).findUnique({
       where: { id },
     });
     if (!transaction) {
@@ -35,15 +36,23 @@ export class TransactionsService {
     return transaction;
   }
 
-  async update(id: string, updateTransactionDto: UpdateTransactionDto): Promise<Transaction> {
+  async update(
+    id: string,
+    updateTransactionDto: UpdateTransactionDto,
+  ): Promise<Transaction> {
     try {
-      return await this.prisma.transaction.update({
+      return await (this.prisma.transaction as any).update({
         where: { id },
         data: updateTransactionDto,
       });
-    } catch (error: any) { // Added :any for error.code access
-      if (error && error.code === 'P2025') {
-        throw new NotFoundException(`Transaction with ID #${id} not found for update`);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(
+          `Transaction with ID #${id} not found for update`,
+        );
       }
       throw error;
     }
@@ -51,12 +60,17 @@ export class TransactionsService {
 
   async remove(id: string): Promise<Transaction> {
     try {
-      return await this.prisma.transaction.delete({
+      return await (this.prisma.transaction as any).delete({
         where: { id },
       });
-    } catch (error: any) {
-      if (error && error.code === 'P2025') {
-        throw new NotFoundException(`Transaction with ID #${id} not found for deletion`);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(
+          `Transaction with ID #${id} not found for deletion`,
+        );
       }
       throw error;
     }

@@ -5,8 +5,6 @@ import { JwtService } from '@nestjs/jwt';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let repository: UserRepository;
-  let jwtService: JwtService;
 
   const mockUserRepository = {
     findUserByEmail: jest.fn(),
@@ -33,8 +31,6 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    repository = module.get<UserRepository>(UserRepository);
-    jwtService = module.get<JwtService>(JwtService);
   });
 
   it('should be defined', () => {

@@ -7,32 +7,27 @@ import { Wallet } from '../../generated/prisma';
 export class WalletService {
   constructor(private prisma: PrismaService) {}
 
-  create(userId: string) {
-    // esta tampoco haría falta xq se crea cuando creas un user directo. 
-    return this.prisma.wallet.create({
-      data: { userId, balance: 0 },
-    });
+  async create(data: any): Promise<any> {
+    return await (this.prisma.wallet as any).create({ data });
   }
 
   findAll() {
     // esto habría q sacarlo no? para que no se pueda acceder a todos los wallets?
     return `This action returns all wallet`;
   }
-  findOne(id: string) {
-    return this.prisma.wallet.findUnique({ where: { id } });
+
+  async findOne(id: string): Promise<any> {
+    return await (this.prisma.wallet as any).findUnique({ where: { id } });
   }
 
-  update(id: string, updateWalletDto: UpdateWalletDto) {
-    return this.prisma.wallet.update({
-      where: { id },
-      data: updateWalletDto,
-    });
+  async update(id: string, data: any): Promise<any> {
+    return await (this.prisma.wallet as any).update({ where: { id }, data });
   }
 
-  remove(id: string) {
-    return this.prisma.wallet.delete({ where: { id } });
+  async remove(id: string): Promise<any> {
+    return await (this.prisma.wallet as any).delete({ where: { id } });
   }
-  
+
   async getWalletBalance(userId: string): Promise<number> {
     const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
     if (!wallet) {

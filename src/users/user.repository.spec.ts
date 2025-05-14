@@ -92,11 +92,11 @@ describe('UserRepository', () => {
           email,
           password,
           wallet: {
-            create: { balance: 0 }
-          }
+            create: { balance: 0 },
+          },
         },
-        include: { wallet: true }
+        include: { wallet: true },
       });
     });
   });
-}); 
+});

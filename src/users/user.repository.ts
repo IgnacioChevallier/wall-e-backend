@@ -12,7 +12,9 @@ export class UserRepository {
     });
   }
 
-  findUserWithWallet(email: string): Promise<(User & { wallet: Wallet | null }) | null> {
+  findUserWithWallet(
+    email: string,
+  ): Promise<(User & { wallet: Wallet | null }) | null> {
     return this.prisma.user.findUnique({
       where: { email },
       include: { wallet: true },
@@ -25,10 +27,10 @@ export class UserRepository {
         email,
         password,
         wallet: {
-          create: { balance: 0 }
-        }
+          create: { balance: 0 },
+        },
       },
-      include: { wallet: true }
+      include: { wallet: true },
     });
   }
 }
