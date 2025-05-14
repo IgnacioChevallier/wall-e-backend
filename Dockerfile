@@ -21,4 +21,5 @@ COPY --from=builder /usr/src/app/package*.json ./
 
 EXPOSE 3000
 
+# Command to run the application
 CMD ["node", "dist/main"]
