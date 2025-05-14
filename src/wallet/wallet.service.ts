@@ -34,6 +34,16 @@ export class WalletService {
   remove(id: string) {
     return this.prisma.wallet.delete({ where: { id } });
   }
+
+  async getWalletByUserId(userId: string): Promise<Wallet | null> {
+    const wallet = await this.prisma.wallet.findUnique({
+      where: { userId },
+    });
+    if (!wallet) {
+      throw new NotFoundException(`Wallet for user ID ${userId} not found.`);
+    }
+    return wallet;
+  }
   
   async getWalletBalance(userId: string): Promise<number> {
     const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
@@ -47,7 +57,7 @@ export class WalletService {
     const wallet = await this.prisma.wallet.findUnique({
       where: { userId },
       include: {
-        transactions: {
+        allTransactions: {
           orderBy: { createdAt: 'desc' },
           take: 10, // Get last 10 transactions
         },
@@ -59,6 +69,27 @@ export class WalletService {
     }
 
     return wallet;
+  }
+
+  async updateWalletBalance(userId: string, amount: number, operation: 'increment' | 'decrement'): Promise<Wallet> {
+    const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
+    if (!wallet) {
+      throw new NotFoundException(`Wallet for user ${userId} not found`);
+    }
+
+    const newBalance =
+      operation === 'increment'
+        ? wallet.balance + amount
+        : wallet.balance - amount;
+
+    if (newBalance < 0) {
+      throw new Error('Insufficient funds'); // Consider a more specific error type
+    }
+
+    return this.prisma.wallet.update({
+      where: { userId },
+      data: { balance: newBalance },
+    });
   }
 
   async addMoney(userId: string, addMoneyDto: AddMoneyDto) {
