@@ -46,7 +46,6 @@ describe('WalletService', () => {
       expect(result).toBe(100);
       expect(mockPrismaService.wallet.findUnique).toHaveBeenCalledWith({
         where: { userId },
-        select: { balance: true },
       });
     });
 
@@ -58,7 +57,6 @@ describe('WalletService', () => {
       );
       expect(mockPrismaService.wallet.findUnique).toHaveBeenCalledWith({
         where: { userId },
-        select: { balance: true },
       });
     });
   });
