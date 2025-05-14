@@ -89,24 +89,57 @@ export class TransactionsService {
     }
   }
 
-  create(createTransactionDto: CreateTransactionDto) {
-    // This needs to be implemented based on the new schema if it's not P2P
-    return 'This action adds a new transaction (implementation pending based on new schema)';
+  async create(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
+    const { amount, type, walletId, description } = createTransactionDto;
+    return this.prisma.transaction.create({
+      data: {
+        amount,
+        type,
+        walletId,
+        description,
+        // wallet: { connect: { id: walletId } } // Alternative way to connect to wallet if needed
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all transactions (implementation pending based on new schema)`;
+  async findAll(): Promise<Transaction[]> {
+    return this.prisma.transaction.findMany();
   }
 
-  findOne(id: string) { // Changed id to string
-    return `This action returns a #${id} transaction (implementation pending based on new schema)`;
+  async findOne(id: string): Promise<Transaction> {
+    const transaction = await this.prisma.transaction.findUnique({
+      where: { id },
+    });
+    if (!transaction) {
+      throw new NotFoundException(`Transaction with ID #${id} not found`);
+    }
+    return transaction;
   }
 
-  update(id: string, updateTransactionDto: UpdateTransactionDto) { // Changed id to string
-    return `This action updates a #${id} transaction (implementation pending based on new schema)`;
+  async update(id: string, updateTransactionDto: UpdateTransactionDto): Promise<Transaction> {
+    try {
+      return await this.prisma.transaction.update({
+        where: { id },
+        data: updateTransactionDto,
+      });
+    } catch (error: any) { // Added :any for error.code access
+      if (error && error.code === 'P2025') {
+        throw new NotFoundException(`Transaction with ID #${id} not found for update`);
+      }
+      throw error;
+    }
   }
 
-  remove(id: string) { // Changed id to string
-    return `This action removes a #${id} transaction (implementation pending based on new schema)`;
+  async remove(id: string): Promise<Transaction> {
+    try {
+      return await this.prisma.transaction.delete({
+        where: { id },
+      });
+    } catch (error: any) {
+      if (error && error.code === 'P2025') {
+        throw new NotFoundException(`Transaction with ID #${id} not found for deletion`);
+      }
+      throw error;
+    }
   }
 }

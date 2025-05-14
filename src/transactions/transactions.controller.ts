@@ -12,6 +12,8 @@ import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { P2PTransferDto } from './dto/p2p-transfer.dto';
+import { Transaction } from '../../generated/prisma';
+
 
 @Controller('transactions')
 export class TransactionsController {
@@ -27,30 +29,30 @@ export class TransactionsController {
   }
 
   @Post()
-  create(@Body() createTransactionDto: CreateTransactionDto) {
+  async create(@Body() createTransactionDto: CreateTransactionDto): Promise<Transaction> {
     return this.transactionsService.create(createTransactionDto);
   }
 
   @Get()
-  findAll() {
+  async findAll(): Promise<Transaction[]> {
     return this.transactionsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<Transaction> {
     return this.transactionsService.findOne(id);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
-    @Body() updateTransactionDto: UpdateTransactionDto,
-  ) {
+    @Body() updateTransactionDto: UpdateTransactionDto): Promise<Transaction> {
     return this.transactionsService.update(id, updateTransactionDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string): Promise<Transaction> {
+
     return this.transactionsService.remove(id);
   }
 }
