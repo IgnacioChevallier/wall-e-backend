@@ -4,11 +4,12 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install
-
 COPY . .
 
 RUN npm run build
+
+# Build bcrypt from source to avoid glibc issues on Alpine
+RUN apk --no-cache add --virtual builds-dependencies build-base python3 make && npm i bcrypt && npm rebuild bcrypt --build-from-source  
 
 FROM node:20-alpine
 
@@ -18,7 +19,6 @@ COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/package*.json ./
 
-# Expose the port the app runs on
 EXPOSE 3000
 
 # Command to run the application
