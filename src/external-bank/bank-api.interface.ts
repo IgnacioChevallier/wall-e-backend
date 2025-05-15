@@ -23,6 +23,6 @@ export interface DebinResponse {
 
 // These are the endpoints that the external bank service must implement
 export const BANK_API_ENDPOINTS = {
-  transfer: '/api/v1/transfer',
-  debin: '/api/v1/debin-request'
+  transfer: '/api/transfer',
+  debin: '/api/debin-request'
 } as const; 

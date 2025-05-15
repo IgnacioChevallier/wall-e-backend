@@ -1,28 +1,41 @@
+version: '3.8'
+
 services:
-  app:
-    build: .
-    container_name: walle-app
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres?schema=public
+      - JWT_SECRET=your-secret-key
+      - BANK_SERVICE_URL=http://bank:3001
     depends_on:
       - db
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+      - bank
 
   db:
-    image: postgres:15-alpine
+    image: postgres:13
     container_name: walle-db
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  bank:
+    build:
+      context: ../bank-service
+      dockerfile: Dockerfile
+    container_name: eva-bank
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
 
 volumes:
   postgres_data:
