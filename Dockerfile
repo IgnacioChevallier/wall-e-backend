@@ -7,12 +7,8 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-# Instalar dependencias según el entorno
-RUN if [ "$NODE_ENV" = "production" ]; then \
-    npm ci --only=production; \
-    else \
-    npm ci; \
-    fi
+# Instalar todas las dependencias para el build
+RUN npm ci
 
 COPY . .
 
