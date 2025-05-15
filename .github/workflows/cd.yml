@@ -2,7 +2,7 @@ name: NestJS Backend CD
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     
 jobs:
   build-and-publish:

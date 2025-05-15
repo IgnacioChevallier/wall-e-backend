@@ -2,9 +2,9 @@ name: NestJS Backend CI
 
 on:
   push:
-    branches: ['*', '!main']
+    branches: ['*', '!master']
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   build-and-test:
@@ -24,7 +24,7 @@ jobs:
         run: npm ci
       
       - name: Check SemVer compliance
-        if: github.event_name == 'pull_request' && github.base_ref == 'main'
+        if: github.event_name == 'pull_request' && github.base_ref == 'master'
         run: |
           chmod +x .github/scripts/semver.sh
           CURRENT_VERSION=$(node -p "require('./package.json').version")
