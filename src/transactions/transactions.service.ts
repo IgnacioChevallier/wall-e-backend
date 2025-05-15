@@ -5,10 +5,11 @@ import { P2PTransferDto } from './dto/p2p-transfer.dto';
 import { UsersService } from '../users/users.service';
 import { WalletService } from '../wallet/wallet.service';
 import { TransactionsRepository } from './transactions.repository';
-import { User } from '../../generated/prisma';
+import { Transaction, User } from '../../generated/prisma';
 
 @Injectable()
 export class TransactionsService {
+  prisma: any;
   constructor(
     private usersService: UsersService,
     private walletService: WalletService,
