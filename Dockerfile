@@ -13,8 +13,6 @@ RUN npm ci
 COPY . .
 
 # Establecer NODE_ENV durante la construcción
-ENV NODE_ENV=${NODE_ENV}
-
 RUN npm run build
 
 # Build bcrypt from source to avoid glibc issues on Alpine
