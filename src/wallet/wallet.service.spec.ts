@@ -31,6 +31,8 @@ describe('WalletService', () => {
   let externalBankService: ExternalBankService;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WalletService,
