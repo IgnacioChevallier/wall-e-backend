@@ -70,7 +70,9 @@ describe('UsersService', () => {
     });
 
     it('should handle database errors', async () => {
-      mockPrismaService.user.findMany.mockRejectedValue(new Error('Database error'));
+      mockPrismaService.user.findMany.mockRejectedValue(
+        new Error('Database error'),
+      );
 
       await expect(service.findAll()).rejects.toThrow('Database error');
       expect(mockPrismaService.user.findMany).toHaveBeenCalled();
@@ -95,7 +97,7 @@ describe('UsersService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(null);
 
       await expect(service.findOne(userId)).rejects.toThrow(
-        new NotFoundException(`User with ID ${userId} not found`)
+        new NotFoundException(`User with ID ${userId} not found`),
       );
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
         where: { id: userId },
@@ -104,7 +106,9 @@ describe('UsersService', () => {
 
     it('should handle database errors', async () => {
       const userId = 'user-id';
-      mockPrismaService.user.findUnique.mockRejectedValue(new Error('Database error'));
+      mockPrismaService.user.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
 
       await expect(service.findOne(userId)).rejects.toThrow('Database error');
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
@@ -118,13 +122,13 @@ describe('UsersService', () => {
       const userId = 'user-id';
       const updateDto: UpdateUserDto = {
         email: 'updated@example.com',
-        password: 'newPassword12345'
+        password: 'newPassword12345',
       };
       const updatedUser = {
         ...mockUser,
         email: updateDto.email,
         password: 'new-hashed-password',
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       mockPrismaService.user.update.mockResolvedValue(updatedUser);
@@ -142,15 +146,15 @@ describe('UsersService', () => {
       const userId = 'non-existent-id';
       const updateDto: UpdateUserDto = {
         email: 'updated@example.com',
-        password: 'newPassword12345'
+        password: 'newPassword12345',
       };
-      
+
       mockPrismaService.user.update.mockRejectedValue(
-        new Error('Record to update not found')
+        new Error('Record to update not found'),
       );
 
       await expect(service.update(userId, updateDto)).rejects.toThrow(
-        'Record to update not found'
+        'Record to update not found',
       );
       expect(mockPrismaService.user.update).toHaveBeenCalledWith({
         where: { id: userId },
@@ -174,13 +178,13 @@ describe('UsersService', () => {
 
     it('should handle database errors including non-existent user', async () => {
       const userId = 'non-existent-id';
-      
+
       mockPrismaService.user.delete.mockRejectedValue(
-        new Error('Record to delete not found')
+        new Error('Record to delete not found'),
       );
 
       await expect(service.remove(userId)).rejects.toThrow(
-        'Record to delete not found'
+        'Record to delete not found',
       );
       expect(mockPrismaService.user.delete).toHaveBeenCalledWith({
         where: { id: userId },

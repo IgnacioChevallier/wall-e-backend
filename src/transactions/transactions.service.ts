@@ -111,7 +111,7 @@ export class TransactionsService {
     createTransactionDto: CreateTransactionDto,
   ): Promise<Transaction> {
     const { amount, type, walletId, description } = createTransactionDto;
-    
+
     // When creating a single transaction, we set the same wallet as sender, receiver, and effected
     return await this.prisma.transaction.create({
       data: {

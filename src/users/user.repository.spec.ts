@@ -67,9 +67,13 @@ describe('UserRepository', () => {
     });
 
     it('should handle database errors', async () => {
-      mockPrismaService.user.findUnique.mockRejectedValue(new Error('Database error'));
+      mockPrismaService.user.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(repository.findUserByEmail(email)).rejects.toThrow('Database error');
+      await expect(repository.findUserByEmail(email)).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 
@@ -122,9 +126,13 @@ describe('UserRepository', () => {
     });
 
     it('should handle database errors', async () => {
-      mockPrismaService.user.findUnique.mockRejectedValue(new Error('Database error'));
+      mockPrismaService.user.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(repository.findUserWithWallet(email)).rejects.toThrow('Database error');
+      await expect(repository.findUserWithWallet(email)).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 
@@ -156,17 +164,21 @@ describe('UserRepository', () => {
           password,
           alias,
           wallet: {
-            create: { balance: 0 }
-          }
+            create: { balance: 0 },
+          },
         },
-        include: { wallet: true }
+        include: { wallet: true },
       });
     });
 
     it('should handle database errors during user creation', async () => {
-      mockPrismaService.user.create.mockRejectedValue(new Error('Database error'));
+      mockPrismaService.user.create.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(repository.createUser(email, password, alias)).rejects.toThrow('Database error');
+      await expect(
+        repository.createUser(email, password, alias),
+      ).rejects.toThrow('Database error');
     });
   });
 });

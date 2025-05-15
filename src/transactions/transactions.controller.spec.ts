@@ -67,7 +67,9 @@ describe('TransactionsController', () => {
       const result = await controller.create(createTransactionDto);
 
       expect(result).toEqual(mockTransaction);
-      expect(mockTransactionsService.create).toHaveBeenCalledWith(createTransactionDto);
+      expect(mockTransactionsService.create).toHaveBeenCalledWith(
+        createTransactionDto,
+      );
     });
 
     it('should handle errors from transactionService.create', async () => {
@@ -78,16 +80,25 @@ describe('TransactionsController', () => {
         walletId: 'wallet-id',
       };
 
-      mockTransactionsService.create.mockRejectedValue(new Error('Create failed'));
+      mockTransactionsService.create.mockRejectedValue(
+        new Error('Create failed'),
+      );
 
-      await expect(controller.create(createTransactionDto)).rejects.toThrow('Create failed');
-      expect(mockTransactionsService.create).toHaveBeenCalledWith(createTransactionDto);
+      await expect(controller.create(createTransactionDto)).rejects.toThrow(
+        'Create failed',
+      );
+      expect(mockTransactionsService.create).toHaveBeenCalledWith(
+        createTransactionDto,
+      );
     });
   });
 
   describe('findAll', () => {
     it('should return all transactions for a wallet', async () => {
-      const mockTransactions = [mockTransaction, { ...mockTransaction, id: 'transaction-id-2' }];
+      const mockTransactions = [
+        mockTransaction,
+        { ...mockTransaction, id: 'transaction-id-2' },
+      ];
 
       mockTransactionsService.findAll.mockResolvedValue(mockTransactions);
 
@@ -98,7 +109,9 @@ describe('TransactionsController', () => {
     });
 
     it('should handle errors from transactionService.findAll', async () => {
-      mockTransactionsService.findAll.mockRejectedValue(new Error('Find all failed'));
+      mockTransactionsService.findAll.mockRejectedValue(
+        new Error('Find all failed'),
+      );
 
       await expect(controller.findAll()).rejects.toThrow('Find all failed');
       expect(mockTransactionsService.findAll).toHaveBeenCalled();
@@ -114,16 +127,24 @@ describe('TransactionsController', () => {
       const result = await controller.findOne(transactionId);
 
       expect(result).toEqual(mockTransaction);
-      expect(mockTransactionsService.findOne).toHaveBeenCalledWith(transactionId);
+      expect(mockTransactionsService.findOne).toHaveBeenCalledWith(
+        transactionId,
+      );
     });
 
     it('should handle errors from transactionService.findOne', async () => {
       const transactionId = '123';
 
-      mockTransactionsService.findOne.mockRejectedValue(new Error('Find one failed'));
+      mockTransactionsService.findOne.mockRejectedValue(
+        new Error('Find one failed'),
+      );
 
-      await expect(controller.findOne(transactionId)).rejects.toThrow('Find one failed');
-      expect(mockTransactionsService.findOne).toHaveBeenCalledWith(transactionId);
+      await expect(controller.findOne(transactionId)).rejects.toThrow(
+        'Find one failed',
+      );
+      expect(mockTransactionsService.findOne).toHaveBeenCalledWith(
+        transactionId,
+      );
     });
   });
 
@@ -136,10 +157,16 @@ describe('TransactionsController', () => {
 
       mockTransactionsService.update.mockResolvedValue(mockUpdatedTransaction);
 
-      const result = await controller.update(transactionId, updateTransactionDto);
+      const result = await controller.update(
+        transactionId,
+        updateTransactionDto,
+      );
 
       expect(result).toEqual(mockUpdatedTransaction);
-      expect(mockTransactionsService.update).toHaveBeenCalledWith(transactionId, updateTransactionDto);
+      expect(mockTransactionsService.update).toHaveBeenCalledWith(
+        transactionId,
+        updateTransactionDto,
+      );
     });
 
     it('should handle errors from transactionService.update', async () => {
@@ -148,12 +175,17 @@ describe('TransactionsController', () => {
         description: 'Updated description',
       };
 
-      mockTransactionsService.update.mockRejectedValue(new Error('Update failed'));
-
-      await expect(controller.update(transactionId, updateTransactionDto)).rejects.toThrow(
-        'Update failed',
+      mockTransactionsService.update.mockRejectedValue(
+        new Error('Update failed'),
       );
-      expect(mockTransactionsService.update).toHaveBeenCalledWith(transactionId, updateTransactionDto);
+
+      await expect(
+        controller.update(transactionId, updateTransactionDto),
+      ).rejects.toThrow('Update failed');
+      expect(mockTransactionsService.update).toHaveBeenCalledWith(
+        transactionId,
+        updateTransactionDto,
+      );
     });
   });
 
@@ -166,16 +198,24 @@ describe('TransactionsController', () => {
       const result = await controller.remove(transactionId);
 
       expect(result).toEqual(mockTransaction);
-      expect(mockTransactionsService.remove).toHaveBeenCalledWith(transactionId);
+      expect(mockTransactionsService.remove).toHaveBeenCalledWith(
+        transactionId,
+      );
     });
 
     it('should handle errors from transactionService.remove', async () => {
       const transactionId = '123';
 
-      mockTransactionsService.remove.mockRejectedValue(new Error('Delete failed'));
+      mockTransactionsService.remove.mockRejectedValue(
+        new Error('Delete failed'),
+      );
 
-      await expect(controller.remove(transactionId)).rejects.toThrow('Delete failed');
-      expect(mockTransactionsService.remove).toHaveBeenCalledWith(transactionId);
+      await expect(controller.remove(transactionId)).rejects.toThrow(
+        'Delete failed',
+      );
+      expect(mockTransactionsService.remove).toHaveBeenCalledWith(
+        transactionId,
+      );
     });
   });
 });

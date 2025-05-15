@@ -15,7 +15,7 @@ describe('AuthController', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
@@ -41,11 +41,11 @@ describe('AuthController', () => {
         password: 'password123',
       };
       const mockResult = { access_token: 'test-token' };
-      
+
       mockAuthService.register.mockResolvedValue(mockResult);
-      
+
       const result = await controller.register(registerDto);
-      
+
       expect(result).toEqual(mockResult);
       expect(mockAuthService.register).toHaveBeenCalledWith(registerDto);
       expect(mockAuthService.register).toHaveBeenCalledTimes(1);
@@ -56,10 +56,14 @@ describe('AuthController', () => {
         email: 'test@example.com',
         password: 'password123',
       };
-      
-      mockAuthService.register.mockRejectedValue(new Error('Registration failed'));
-      
-      await expect(controller.register(registerDto)).rejects.toThrow('Registration failed');
+
+      mockAuthService.register.mockRejectedValue(
+        new Error('Registration failed'),
+      );
+
+      await expect(controller.register(registerDto)).rejects.toThrow(
+        'Registration failed',
+      );
       expect(mockAuthService.register).toHaveBeenCalledWith(registerDto);
     });
   });
@@ -71,11 +75,11 @@ describe('AuthController', () => {
         password: 'password123',
       };
       const mockResult = { access_token: 'test-token' };
-      
+
       mockAuthService.login.mockResolvedValue(mockResult);
-      
+
       const result = await controller.login(loginDto);
-      
+
       expect(result).toEqual(mockResult);
       expect(mockAuthService.login).toHaveBeenCalledWith(loginDto);
       expect(mockAuthService.login).toHaveBeenCalledTimes(1);
@@ -86,9 +90,9 @@ describe('AuthController', () => {
         email: 'test@example.com',
         password: 'password123',
       };
-      
+
       mockAuthService.login.mockRejectedValue(new Error('Login failed'));
-      
+
       await expect(controller.login(loginDto)).rejects.toThrow('Login failed');
       expect(mockAuthService.login).toHaveBeenCalledWith(loginDto);
     });

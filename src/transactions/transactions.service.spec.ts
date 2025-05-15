@@ -26,7 +26,7 @@ describe('TransactionsService', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
   };
-  
+
   const mockRecipient = {
     id: 'recipient-id',
     email: 'recipient@example.com',
@@ -36,7 +36,7 @@ describe('TransactionsService', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
   };
-  
+
   const mockSenderWallet = {
     id: 'sender-wallet-id',
     userId: 'sender-id',
@@ -44,7 +44,7 @@ describe('TransactionsService', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
   };
-  
+
   const mockRecipientWallet = {
     id: 'recipient-wallet-id',
     userId: 'recipient-id',
@@ -52,7 +52,7 @@ describe('TransactionsService', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
   };
-  
+
   const mockSenderTransaction = {
     id: 'sender-transaction-id',
     amount: 100,
@@ -63,7 +63,7 @@ describe('TransactionsService', () => {
     receiverWalletId: 'recipient-wallet-id',
     effectedWalletId: 'sender-wallet-id',
   };
-  
+
   const mockRecipientTransaction = {
     id: 'recipient-transaction-id',
     amount: 100,
@@ -74,7 +74,7 @@ describe('TransactionsService', () => {
     receiverWalletId: 'recipient-wallet-id',
     effectedWalletId: 'recipient-wallet-id',
   };
-  
+
   const mockTransaction = {
     id: 'transaction-id',
     amount: 100,
@@ -133,7 +133,9 @@ describe('TransactionsService', () => {
     service = module.get<TransactionsService>(TransactionsService);
     usersService = module.get<UsersService>(UsersService);
     walletService = module.get<WalletService>(WalletService);
-    transactionsRepository = module.get<TransactionsRepository>(TransactionsRepository);
+    transactionsRepository = module.get<TransactionsRepository>(
+      TransactionsRepository,
+    );
     prismaService = module.get<PrismaService>(PrismaService);
   });
 
@@ -148,18 +150,25 @@ describe('TransactionsService', () => {
     };
 
     it('should successfully transfer funds between users', async () => {
-      
       jest.spyOn(usersService, 'findOne').mockResolvedValue(mockSender);
-      jest.spyOn(usersService, 'findByEmailOrAlias').mockResolvedValue(mockRecipient);
-      jest.spyOn(walletService, 'getWalletByUserId')
+      jest
+        .spyOn(usersService, 'findByEmailOrAlias')
+        .mockResolvedValue(mockRecipient);
+      jest
+        .spyOn(walletService, 'getWalletByUserId')
         .mockResolvedValueOnce(mockSenderWallet)
         .mockResolvedValueOnce(mockRecipientWallet);
-      jest.spyOn(transactionsRepository, 'createP2PTransfer').mockResolvedValue({
-        senderTransaction: mockSenderTransaction,
-        recipientTransaction: mockRecipientTransaction,
-      });
+      jest
+        .spyOn(transactionsRepository, 'createP2PTransfer')
+        .mockResolvedValue({
+          senderTransaction: mockSenderTransaction,
+          recipientTransaction: mockRecipientTransaction,
+        });
 
-      const result = await service.createP2PTransfer('sender-id', p2pTransferDto);
+      const result = await service.createP2PTransfer(
+        'sender-id',
+        p2pTransferDto,
+      );
 
       expect(result).toEqual({
         message: 'Transfer successful',
@@ -168,9 +177,17 @@ describe('TransactionsService', () => {
       });
 
       expect(usersService.findOne).toHaveBeenCalledWith('sender-id');
-      expect(usersService.findByEmailOrAlias).toHaveBeenCalledWith('recipient@example.com');
-      expect(walletService.getWalletByUserId).toHaveBeenNthCalledWith(1, 'sender-id');
-      expect(walletService.getWalletByUserId).toHaveBeenNthCalledWith(2, 'recipient-id');
+      expect(usersService.findByEmailOrAlias).toHaveBeenCalledWith(
+        'recipient@example.com',
+      );
+      expect(walletService.getWalletByUserId).toHaveBeenNthCalledWith(
+        1,
+        'sender-id',
+      );
+      expect(walletService.getWalletByUserId).toHaveBeenNthCalledWith(
+        2,
+        'recipient-id',
+      );
       expect(transactionsRepository.createP2PTransfer).toHaveBeenCalledWith({
         amount: 100,
         senderWallet: mockSenderWallet,
@@ -181,96 +198,146 @@ describe('TransactionsService', () => {
     });
 
     it('should throw NotFoundException when sender does not exist', async () => {
-  
       jest.spyOn(usersService, 'findOne').mockResolvedValue(null as any);
 
-      await expect(service.createP2PTransfer('non-existent-id', p2pTransferDto))
-        .rejects
-        .toThrow(new NotFoundException('Sender with ID non-existent-id not found.'));
+      await expect(
+        service.createP2PTransfer('non-existent-id', p2pTransferDto),
+      ).rejects.toThrow(
+        new NotFoundException('Sender with ID non-existent-id not found.'),
+      );
 
       expect(usersService.findOne).toHaveBeenCalledWith('non-existent-id');
     });
 
     it('should throw NotFoundException when recipient does not exist', async () => {
-      
       jest.spyOn(usersService, 'findOne').mockResolvedValue(mockSender);
       jest.spyOn(usersService, 'findByEmailOrAlias').mockImplementation(() => {
-        throw new NotFoundException('Recipient with email non-existent@example.com not found.');
+        throw new NotFoundException(
+          'Recipient with email non-existent@example.com not found.',
+        );
       });
 
-      const dtoCopy = { ...p2pTransferDto, recipientIdentifier: 'non-existent@example.com' };
-      await expect(service.createP2PTransfer('sender-id', dtoCopy))
-        .rejects
-        .toThrow(new NotFoundException('Recipient with email non-existent@example.com not found.'));
+      const dtoCopy = {
+        ...p2pTransferDto,
+        recipientIdentifier: 'non-existent@example.com',
+      };
+      await expect(
+        service.createP2PTransfer('sender-id', dtoCopy),
+      ).rejects.toThrow(
+        new NotFoundException(
+          'Recipient with email non-existent@example.com not found.',
+        ),
+      );
 
       expect(usersService.findOne).toHaveBeenCalledWith('sender-id');
-      expect(usersService.findByEmailOrAlias).toHaveBeenCalledWith('non-existent@example.com');
+      expect(usersService.findByEmailOrAlias).toHaveBeenCalledWith(
+        'non-existent@example.com',
+      );
     });
 
     it('should throw BadRequestException when transferring to self', async () => {
-
       jest.spyOn(usersService, 'findOne').mockResolvedValue(mockSender);
-      jest.spyOn(usersService, 'findByEmailOrAlias').mockResolvedValue(mockSender);
+      jest
+        .spyOn(usersService, 'findByEmailOrAlias')
+        .mockResolvedValue(mockSender);
 
-      await expect(service.createP2PTransfer('sender-id', p2pTransferDto))
-        .rejects
-        .toThrow(new BadRequestException('Cannot transfer funds to yourself.'));
+      await expect(
+        service.createP2PTransfer('sender-id', p2pTransferDto),
+      ).rejects.toThrow(
+        new BadRequestException('Cannot transfer funds to yourself.'),
+      );
 
       expect(usersService.findOne).toHaveBeenCalledWith('sender-id');
-      expect(usersService.findByEmailOrAlias).toHaveBeenCalledWith('recipient@example.com');
+      expect(usersService.findByEmailOrAlias).toHaveBeenCalledWith(
+        'recipient@example.com',
+      );
     });
 
     it('should throw NotFoundException when sender wallet does not exist', async () => {
-
       jest.spyOn(usersService, 'findOne').mockResolvedValue(mockSender);
-      jest.spyOn(usersService, 'findByEmailOrAlias').mockResolvedValue(mockRecipient);
-      jest.spyOn(walletService, 'getWalletByUserId').mockResolvedValueOnce(null as any);
+      jest
+        .spyOn(usersService, 'findByEmailOrAlias')
+        .mockResolvedValue(mockRecipient);
+      jest
+        .spyOn(walletService, 'getWalletByUserId')
+        .mockResolvedValueOnce(null as any);
 
-      await expect(service.createP2PTransfer('sender-id', p2pTransferDto))
-        .rejects
-        .toThrow(new NotFoundException('Wallet for sender sender-id not found. Please ensure the sender has a wallet.'));
+      await expect(
+        service.createP2PTransfer('sender-id', p2pTransferDto),
+      ).rejects.toThrow(
+        new NotFoundException(
+          'Wallet for sender sender-id not found. Please ensure the sender has a wallet.',
+        ),
+      );
 
       expect(usersService.findOne).toHaveBeenCalledWith('sender-id');
-      expect(usersService.findByEmailOrAlias).toHaveBeenCalledWith('recipient@example.com');
+      expect(usersService.findByEmailOrAlias).toHaveBeenCalledWith(
+        'recipient@example.com',
+      );
       expect(walletService.getWalletByUserId).toHaveBeenCalledWith('sender-id');
     });
 
     it('should throw NotFoundException when recipient wallet does not exist', async () => {
-
       jest.spyOn(usersService, 'findOne').mockResolvedValue(mockSender);
-      jest.spyOn(usersService, 'findByEmailOrAlias').mockResolvedValue(mockRecipient);
-      jest.spyOn(walletService, 'getWalletByUserId')
+      jest
+        .spyOn(usersService, 'findByEmailOrAlias')
+        .mockResolvedValue(mockRecipient);
+      jest
+        .spyOn(walletService, 'getWalletByUserId')
         .mockResolvedValueOnce(mockSenderWallet)
         .mockResolvedValueOnce(null as any);
 
-      await expect(service.createP2PTransfer('sender-id', p2pTransferDto))
-        .rejects
-        .toThrow(new NotFoundException(`Wallet for recipient ${mockRecipient.email} not found. Please ensure the recipient has a wallet.`));
+      await expect(
+        service.createP2PTransfer('sender-id', p2pTransferDto),
+      ).rejects.toThrow(
+        new NotFoundException(
+          `Wallet for recipient ${mockRecipient.email} not found. Please ensure the recipient has a wallet.`,
+        ),
+      );
 
       expect(usersService.findOne).toHaveBeenCalledWith('sender-id');
-      expect(usersService.findByEmailOrAlias).toHaveBeenCalledWith('recipient@example.com');
-      expect(walletService.getWalletByUserId).toHaveBeenNthCalledWith(1, 'sender-id');
-      expect(walletService.getWalletByUserId).toHaveBeenNthCalledWith(2, 'recipient-id');
+      expect(usersService.findByEmailOrAlias).toHaveBeenCalledWith(
+        'recipient@example.com',
+      );
+      expect(walletService.getWalletByUserId).toHaveBeenNthCalledWith(
+        1,
+        'sender-id',
+      );
+      expect(walletService.getWalletByUserId).toHaveBeenNthCalledWith(
+        2,
+        'recipient-id',
+      );
     });
 
     it('should throw BadRequestException when repository throws an error', async () => {
-
       jest.spyOn(usersService, 'findOne').mockResolvedValue(mockSender);
-      jest.spyOn(usersService, 'findByEmailOrAlias').mockResolvedValue(mockRecipient);
-      jest.spyOn(walletService, 'getWalletByUserId')
+      jest
+        .spyOn(usersService, 'findByEmailOrAlias')
+        .mockResolvedValue(mockRecipient);
+      jest
+        .spyOn(walletService, 'getWalletByUserId')
         .mockResolvedValueOnce(mockSenderWallet)
         .mockResolvedValueOnce(mockRecipientWallet);
-      jest.spyOn(transactionsRepository, 'createP2PTransfer').mockImplementation(() => {
-        throw new Error('Database error');
-      });
-      
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      jest
+        .spyOn(transactionsRepository, 'createP2PTransfer')
+        .mockImplementation(() => {
+          throw new Error('Database error');
+        });
 
-      await expect(service.createP2PTransfer('sender-id', p2pTransferDto))
-        .rejects
-        .toThrow(new BadRequestException('P2P Transfer failed. Please try again later.'));
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('P2P Transfer failed:', expect.any(Error));
+      await expect(
+        service.createP2PTransfer('sender-id', p2pTransferDto),
+      ).rejects.toThrow(
+        new BadRequestException('P2P Transfer failed. Please try again later.'),
+      );
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'P2P Transfer failed:',
+        expect.any(Error),
+      );
       consoleErrorSpy.mockRestore();
     });
   });
@@ -284,14 +351,15 @@ describe('TransactionsService', () => {
     };
 
     it('should create a transaction successfully', async () => {
-      
       const updatedMockTransaction = {
         ...mockTransaction,
         senderWalletId: 'wallet-id',
         receiverWalletId: 'wallet-id',
         effectedWalletId: 'wallet-id',
       };
-      mockPrismaService.transaction.create.mockResolvedValue(updatedMockTransaction);
+      mockPrismaService.transaction.create.mockResolvedValue(
+        updatedMockTransaction,
+      );
 
       const result = await service.create(createTransactionDto);
 
@@ -318,7 +386,10 @@ describe('TransactionsService', () => {
 
   describe('findAll', () => {
     it('should return all transactions', async () => {
-      const transactions = [mockTransaction, { ...mockTransaction, id: 'transaction-id-2' }];
+      const transactions = [
+        mockTransaction,
+        { ...mockTransaction, id: 'transaction-id-2' },
+      ];
       mockPrismaService.transaction.findMany.mockResolvedValue(transactions);
 
       const result = await service.findAll();
@@ -337,7 +408,9 @@ describe('TransactionsService', () => {
 
   describe('findOne', () => {
     it('should return a transaction when it exists', async () => {
-      mockPrismaService.transaction.findUnique.mockResolvedValue(mockTransaction);
+      mockPrismaService.transaction.findUnique.mockResolvedValue(
+        mockTransaction,
+      );
 
       const result = await service.findOne('transaction-id');
 
@@ -351,7 +424,7 @@ describe('TransactionsService', () => {
       mockPrismaService.transaction.findUnique.mockResolvedValue(null);
 
       await expect(service.findOne('non-existent-id')).rejects.toThrow(
-        new NotFoundException('Transaction with ID #non-existent-id not found')
+        new NotFoundException('Transaction with ID #non-existent-id not found'),
       );
     });
 
@@ -369,10 +442,18 @@ describe('TransactionsService', () => {
     };
 
     it('should update a transaction when it exists', async () => {
-      const updatedTransaction = { ...mockTransaction, description: 'Updated description' };
-      mockPrismaService.transaction.update.mockResolvedValue(updatedTransaction);
+      const updatedTransaction = {
+        ...mockTransaction,
+        description: 'Updated description',
+      };
+      mockPrismaService.transaction.update.mockResolvedValue(
+        updatedTransaction,
+      );
 
-      const result = await service.update('transaction-id', updateTransactionDto);
+      const result = await service.update(
+        'transaction-id',
+        updateTransactionDto,
+      );
 
       expect(result).toEqual(updatedTransaction);
       expect(mockPrismaService.transaction.update).toHaveBeenCalledWith({
@@ -388,8 +469,12 @@ describe('TransactionsService', () => {
       });
       mockPrismaService.transaction.update.mockRejectedValue(prismaError);
 
-      await expect(service.update('non-existent-id', updateTransactionDto)).rejects.toThrow(
-        new NotFoundException('Transaction with ID #non-existent-id not found for update')
+      await expect(
+        service.update('non-existent-id', updateTransactionDto),
+      ).rejects.toThrow(
+        new NotFoundException(
+          'Transaction with ID #non-existent-id not found for update',
+        ),
       );
     });
 
@@ -397,7 +482,9 @@ describe('TransactionsService', () => {
       const error = new Error('Database error');
       mockPrismaService.transaction.update.mockRejectedValue(error);
 
-      await expect(service.update('transaction-id', updateTransactionDto)).rejects.toThrow(error);
+      await expect(
+        service.update('transaction-id', updateTransactionDto),
+      ).rejects.toThrow(error);
     });
   });
 
@@ -421,7 +508,9 @@ describe('TransactionsService', () => {
       mockPrismaService.transaction.delete.mockRejectedValue(prismaError);
 
       await expect(service.remove('non-existent-id')).rejects.toThrow(
-        new NotFoundException('Transaction with ID #non-existent-id not found for deletion')
+        new NotFoundException(
+          'Transaction with ID #non-existent-id not found for deletion',
+        ),
       );
     });
 

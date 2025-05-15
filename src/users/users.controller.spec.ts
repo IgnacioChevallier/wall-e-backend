@@ -78,11 +78,11 @@ describe('UsersController', () => {
     it('should handle NotFoundException from usersService.findOne', async () => {
       const userId = 'non-existent-id';
       mockUsersService.findOne.mockRejectedValue(
-        new NotFoundException(`User with ID ${userId} not found`)
+        new NotFoundException(`User with ID ${userId} not found`),
       );
 
       await expect(controller.findOne(userId)).rejects.toThrow(
-        new NotFoundException(`User with ID ${userId} not found`)
+        new NotFoundException(`User with ID ${userId} not found`),
       );
       expect(mockUsersService.findOne).toHaveBeenCalledWith(userId);
     });
@@ -91,7 +91,9 @@ describe('UsersController', () => {
       const userId = 'user-id';
       mockUsersService.findOne.mockRejectedValue(new Error('Database error'));
 
-      await expect(controller.findOne(userId)).rejects.toThrow('Database error');
+      await expect(controller.findOne(userId)).rejects.toThrow(
+        'Database error',
+      );
       expect(mockUsersService.findOne).toHaveBeenCalledWith(userId);
     });
   });
@@ -99,9 +101,10 @@ describe('UsersController', () => {
   describe('update', () => {
     it('should update and return a user', async () => {
       const userId = 'user-id';
-      const updateDto: UpdateUserDto = { email: 'updated@example.com',
-        password: 'newPassword12345'
-       };
+      const updateDto: UpdateUserDto = {
+        email: 'updated@example.com',
+        password: 'newPassword12345',
+      };
       const updatedUser = { ...mockUser, ...updateDto };
 
       mockUsersService.update.mockResolvedValue(updatedUser);
@@ -114,13 +117,16 @@ describe('UsersController', () => {
 
     it('should handle errors from usersService.update', async () => {
       const userId = 'user-id';
-      const updateDto: UpdateUserDto = { email: 'updated@example.com',
-        password: 'newPassword12345'
-       };
+      const updateDto: UpdateUserDto = {
+        email: 'updated@example.com',
+        password: 'newPassword12345',
+      };
 
       mockUsersService.update.mockRejectedValue(new Error('Update failed'));
 
-      await expect(controller.update(userId, updateDto)).rejects.toThrow('Update failed');
+      await expect(controller.update(userId, updateDto)).rejects.toThrow(
+        'Update failed',
+      );
       expect(mockUsersService.update).toHaveBeenCalledWith(userId, updateDto);
     });
   });

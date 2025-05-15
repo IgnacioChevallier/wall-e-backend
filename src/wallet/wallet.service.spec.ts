@@ -84,7 +84,10 @@ describe('WalletService', () => {
   describe('create', () => {
     it('should create a wallet with initial balance of 0', async () => {
       const userId = 'user-id';
-      mockPrismaService.wallet.create.mockResolvedValue({ ...mockWallet, balance: 0 });
+      mockPrismaService.wallet.create.mockResolvedValue({
+        ...mockWallet,
+        balance: 0,
+      });
 
       const result = await service.create(userId);
 
@@ -96,7 +99,9 @@ describe('WalletService', () => {
 
     it('should handle database errors during wallet creation', async () => {
       const userId = 'user-id';
-      mockPrismaService.wallet.create.mockRejectedValue(new Error('Database error'));
+      mockPrismaService.wallet.create.mockRejectedValue(
+        new Error('Database error'),
+      );
 
       await expect(service.create(userId)).rejects.toThrow('Database error');
     });
@@ -126,7 +131,9 @@ describe('WalletService', () => {
 
     it('should handle database errors', async () => {
       const walletId = 'wallet-id';
-      mockPrismaService.wallet.findUnique.mockRejectedValue(new Error('Database error'));
+      mockPrismaService.wallet.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
 
       await expect(service.findOne(walletId)).rejects.toThrow('Database error');
     });
@@ -137,7 +144,7 @@ describe('WalletService', () => {
       const walletId = 'wallet-id';
       const updateDto = { balance: 150.0 };
       const updatedWallet = { ...mockWallet, balance: 150.0 };
-      
+
       mockPrismaService.wallet.update.mockResolvedValue(updatedWallet);
 
       const result = await service.update(walletId, updateDto);
@@ -152,10 +159,14 @@ describe('WalletService', () => {
     it('should handle database errors during update', async () => {
       const walletId = 'wallet-id';
       const updateDto = { balance: 150.0 };
-      
-      mockPrismaService.wallet.update.mockRejectedValue(new Error('Database error'));
 
-      await expect(service.update(walletId, updateDto)).rejects.toThrow('Database error');
+      mockPrismaService.wallet.update.mockRejectedValue(
+        new Error('Database error'),
+      );
+
+      await expect(service.update(walletId, updateDto)).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 
@@ -174,7 +185,9 @@ describe('WalletService', () => {
 
     it('should handle database errors during deletion', async () => {
       const walletId = 'wallet-id';
-      mockPrismaService.wallet.delete.mockRejectedValue(new Error('Database error'));
+      mockPrismaService.wallet.delete.mockRejectedValue(
+        new Error('Database error'),
+      );
 
       await expect(service.remove(walletId)).rejects.toThrow('Database error');
     });
@@ -198,22 +211,28 @@ describe('WalletService', () => {
       mockPrismaService.wallet.findUnique.mockResolvedValue(null);
 
       await expect(service.getWalletBalance(userId)).rejects.toThrow(
-        new NotFoundException('Wallet not found')
+        new NotFoundException('Wallet not found'),
       );
     });
 
     it('should handle database errors', async () => {
       const userId = 'user-id';
-      mockPrismaService.wallet.findUnique.mockRejectedValue(new Error('Database error'));
+      mockPrismaService.wallet.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.getWalletBalance(userId)).rejects.toThrow('Database error');
+      await expect(service.getWalletBalance(userId)).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 
   describe('getWalletDetails', () => {
     it('should return wallet with transactions when wallet found', async () => {
       const userId = 'user-id';
-      mockPrismaService.wallet.findUnique.mockResolvedValue(mockWalletWithTransactions);
+      mockPrismaService.wallet.findUnique.mockResolvedValue(
+        mockWalletWithTransactions,
+      );
 
       const result = await service.getWalletDetails(userId);
 
@@ -234,15 +253,19 @@ describe('WalletService', () => {
       mockPrismaService.wallet.findUnique.mockResolvedValue(null);
 
       await expect(service.getWalletDetails(userId)).rejects.toThrow(
-        new NotFoundException('Wallet not found')
+        new NotFoundException('Wallet not found'),
       );
     });
 
     it('should handle database errors', async () => {
       const userId = 'user-id';
-      mockPrismaService.wallet.findUnique.mockRejectedValue(new Error('Database error'));
+      mockPrismaService.wallet.findUnique.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.getWalletDetails(userId)).rejects.toThrow('Database error');
+      await expect(service.getWalletDetails(userId)).rejects.toThrow(
+        'Database error',
+      );
     });
   });
 });

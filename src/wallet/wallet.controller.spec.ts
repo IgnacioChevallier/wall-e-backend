@@ -61,19 +61,23 @@ describe('WalletController', () => {
       const result = await controller.getBalance(mockReq);
 
       expect(result).toEqual({ balance: 100 });
-      expect(mockWalletService.getWalletBalance).toHaveBeenCalledWith('user-id');
+      expect(mockWalletService.getWalletBalance).toHaveBeenCalledWith(
+        'user-id',
+      );
     });
 
     it('should handle errors from walletService.getWalletBalance', async () => {
       const mockReq = { user: { sub: 'user-id' } };
       mockWalletService.getWalletBalance.mockRejectedValue(
-        new NotFoundException('Wallet not found')
+        new NotFoundException('Wallet not found'),
       );
 
       await expect(controller.getBalance(mockReq)).rejects.toThrow(
-        new NotFoundException('Wallet not found')
+        new NotFoundException('Wallet not found'),
       );
-      expect(mockWalletService.getWalletBalance).toHaveBeenCalledWith('user-id');
+      expect(mockWalletService.getWalletBalance).toHaveBeenCalledWith(
+        'user-id',
+      );
     });
   });
 
@@ -85,19 +89,23 @@ describe('WalletController', () => {
       const result = await controller.getWalletDetails(mockReq);
 
       expect(result).toEqual(mockWallet);
-      expect(mockWalletService.getWalletDetails).toHaveBeenCalledWith('user-id');
+      expect(mockWalletService.getWalletDetails).toHaveBeenCalledWith(
+        'user-id',
+      );
     });
 
     it('should handle errors from walletService.getWalletDetails', async () => {
       const mockReq = { user: { sub: 'user-id' } };
       mockWalletService.getWalletDetails.mockRejectedValue(
-        new NotFoundException('Wallet not found')
+        new NotFoundException('Wallet not found'),
       );
 
       await expect(controller.getWalletDetails(mockReq)).rejects.toThrow(
-        new NotFoundException('Wallet not found')
+        new NotFoundException('Wallet not found'),
       );
-      expect(mockWalletService.getWalletDetails).toHaveBeenCalledWith('user-id');
+      expect(mockWalletService.getWalletDetails).toHaveBeenCalledWith(
+        'user-id',
+      );
     });
   });
 
@@ -126,7 +134,9 @@ describe('WalletController', () => {
       const walletId = 'wallet-id';
       mockWalletService.findOne.mockRejectedValue(new Error('Database error'));
 
-      await expect(controller.findOne(walletId)).rejects.toThrow('Database error');
+      await expect(controller.findOne(walletId)).rejects.toThrow(
+        'Database error',
+      );
       expect(mockWalletService.findOne).toHaveBeenCalledWith(walletId);
     });
   });
@@ -142,17 +152,25 @@ describe('WalletController', () => {
       const result = await controller.update(walletId, updateDto);
 
       expect(result).toEqual(updatedWallet);
-      expect(mockWalletService.update).toHaveBeenCalledWith(walletId, updateDto);
+      expect(mockWalletService.update).toHaveBeenCalledWith(
+        walletId,
+        updateDto,
+      );
     });
 
     it('should handle errors from walletService.update', async () => {
       const walletId = 'wallet-id';
       const updateDto: UpdateWalletDto = { balance: 150 };
-      
+
       mockWalletService.update.mockRejectedValue(new Error('Database error'));
 
-      await expect(controller.update(walletId, updateDto)).rejects.toThrow('Database error');
-      expect(mockWalletService.update).toHaveBeenCalledWith(walletId, updateDto);
+      await expect(controller.update(walletId, updateDto)).rejects.toThrow(
+        'Database error',
+      );
+      expect(mockWalletService.update).toHaveBeenCalledWith(
+        walletId,
+        updateDto,
+      );
     });
   });
 
@@ -171,7 +189,9 @@ describe('WalletController', () => {
       const walletId = 'wallet-id';
       mockWalletService.remove.mockRejectedValue(new Error('Database error'));
 
-      await expect(controller.remove(walletId)).rejects.toThrow('Database error');
+      await expect(controller.remove(walletId)).rejects.toThrow(
+        'Database error',
+      );
       expect(mockWalletService.remove).toHaveBeenCalledWith(walletId);
     });
   });
