@@ -56,9 +56,9 @@ export class TransactionsService {
         throw new NotFoundException(`Wallet for sender ${sender.id} not found. Please ensure the sender has a wallet.`);
     }
     
-    if (senderWallet.balance < amount) {
-      throw new BadRequestException('Insufficient funds.');
-    }
+    //if (senderWallet.balance < amount) {
+      //throw new BadRequestException('Insufficient funds.');
+    //}
 
     // 4. Fetch recipient's wallet
     const recipientWallet = await this.walletService.getWalletByUserId(recipient.id);

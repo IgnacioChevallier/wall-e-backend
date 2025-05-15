@@ -7,7 +7,9 @@ import {
   Param,
   Delete,
   Request,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -18,7 +20,10 @@ export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Post('p2p')
+  @UseGuards(AuthGuard('jwt'))
   async p2pTransfer(@Request() req, @Body() p2pTransferDto: P2PTransferDto) {
+    console.log('Authenticated user object from req:', req.user);
+
     const senderId = req.user?.id;
     if (!senderId) {
       throw new Error('User not authenticated');
