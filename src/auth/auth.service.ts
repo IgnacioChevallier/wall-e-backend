@@ -1,50 +1,71 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable, ConflictException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import { UsersService } from '../users/users.service';
+import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
-import { UserRepository } from '../users/user.repository';
-import { RegisterUserDto } from './dto/register-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { User } from '../../generated/prisma';
+import { LoginDto } from './dto/login.dto';
+
+export interface AuthResponse {
+  accessToken: string;
+  user: Omit<User, 'password'>;
+}
 
 @Injectable()
 export class AuthService {
   constructor(
-    private repository: UserRepository,
-    private jwt: JwtService,
+    private usersService: UsersService,
+    private jwtService: JwtService,
   ) {}
 
-  // Register method for user registration
-  async register(dto: RegisterUserDto) {
-    const hash: string = await bcrypt.hash(dto.password, 10);
+  async register(createUserDto: CreateUserDto): Promise<AuthResponse> {
+    const { email, password, alias } = createUserDto;
 
-    // Check if user already exists
-    const existingUser = await this.repository.findUserByEmail(dto.email);
-
-    if (existingUser) {
-      throw new ForbiddenException('Email already in use');
+    const existingUserByEmail = await this.usersService.findByEmail(email).catch(() => null);
+    if (existingUserByEmail) {
+      throw new ConflictException('Email already exists');
+    }
+    if (alias) {
+        const existingUserByAlias = await this.usersService.findByAlias(alias).catch(() => null);
+        if (existingUserByAlias) {
+            throw new ConflictException('Alias already exists');
+        }
     }
 
-    // Create the new user
-    const userWithWallet = await this.repository.createUser(dto.email, hash);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Sign and return the JWT token
-    return this.signToken(userWithWallet.id, userWithWallet.email);
+    try {
+      const user: User = await this.usersService.create({
+        email,
+        password: hashedPassword,
+        alias,
+      });
+
+      const { password: _, ...userWithoutPassword } = user; 
+      const payload = { email: user.email, userId: user.id };
+      const accessToken = this.jwtService.sign(payload);
+
+      return { accessToken, user: userWithoutPassword };
+    } catch (error) {
+      if (error.code === 'P2002') { 
+        throw new ConflictException('User with this email or alias already exists (from database constraint).');
+      }
+      console.error("Error during user registration:", error);
+      throw new InternalServerErrorException('Could not create user due to an unexpected error.');
+    }
   }
 
-  // Login method for user authentication
-  async login(dto: LoginUserDto) {
-    const user = await this.repository.findUserByEmail(dto.email);
-    if (!user) throw new ForbiddenException('Credentials incorrect');
+  async login(loginDto: LoginDto): Promise<AuthResponse> {
+    const { email, password } = loginDto;
+    // This will still error if findByEmail is not in UsersService
+    const user = await this.usersService.findByEmail(email);
 
-    const pwMatches = await bcrypt.compare(dto.password, user.password);
-    if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
-
-    return this.signToken(user.id, user.email);
-  }
-
-  // Private method to sign JWT token
-  private async signToken(userId: string, email: string) {
-    const payload = { sub: userId, email };
-    const token = await this.jwt.signAsync(payload);
-    return { access_token: token };
+    if (user && user.password && (await bcrypt.compare(password, user.password))) {
+      const { password: _, ...userWithoutPassword } = user;
+      const payload = { email: user.email, userId: user.id };
+      const accessToken = this.jwtService.sign(payload);
+      return { accessToken, user: userWithoutPassword };
+    }
+    throw new UnauthorizedException('Please check your login credentials');
   }
 }

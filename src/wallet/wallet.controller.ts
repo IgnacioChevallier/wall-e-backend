@@ -6,9 +6,12 @@ import {
   Param,
   Delete,
   Request,
+  Post,
 } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
+import { AddMoneyDto } from './dto/add-money.dto';
+import { WithdrawMoneyDto } from './dto/withdraw-money.dto';
 
 interface RequestWithUser {
   user: {
@@ -48,5 +51,16 @@ export class WalletController {
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<any> {
     return await this.walletService.remove(id);
+  }
+
+  // estos dos endpoints son para la integración con medio externo de pago
+  @Post('deposit')
+  async addMoney(@Request() req, @Body() addMoneyDto: AddMoneyDto) {
+    return this.walletService.addMoney(req.user.sub, addMoneyDto);
+  }
+
+  @Post('withdraw')
+  async withdrawMoney(@Request() req, @Body() withdrawDto: WithdrawMoneyDto) {
+    return this.walletService.withdrawMoney(req.user.sub, withdrawDto);
   }
 }

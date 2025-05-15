@@ -21,12 +21,12 @@ export class UserRepository {
     });
   }
 
-  createUser(email: string, password: string): Promise<User> {
+  createUser(email: string, password: string, alias: string): Promise<User> {
     return this.prisma.user.create({
       data: {
         email,
         password,
-        alias: generateAlias(email),
+        alias: alias,
         wallet: {
           create: { balance: 0 },
         },
@@ -34,10 +34,4 @@ export class UserRepository {
       include: { wallet: true },
     });
   }
-}
-
-function generateAlias(email: string): string {
-  const namePart = email.split('@')[0]; // Get the part before the '@'
-  const randomSuffix = Math.random().toString(36).substring(2, 5); // Generate a random suffix
-  return `${namePart}_${randomSuffix}`; // Combine to form the alias
 }
