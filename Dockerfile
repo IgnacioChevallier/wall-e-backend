@@ -1,43 +1,48 @@
-FROM node:20-alpine AS builder
+# Etapa de desarrollo
+FROM node:20-alpine AS development
 
-# Definir argumentos de construcción
-ARG NODE_ENV=production
+WORKDIR /app
 
-WORKDIR /usr/src/app
+# Instalar dependencias necesarias
+RUN apk add --no-cache libc6-compat openssl python3 make g++ bash
 
-COPY package*.json ./
+# Copiar archivos de configuración
+COPY package.json package-lock.json ./
 
-# Instalar todas las dependencias (incluyendo devDependencies para poder compilar)
+# Instalar dependencias
 RUN npm ci
 
+# Copiar el resto de la app
 COPY . .
 
-# Instalar Nest CLI globalmente para poder ejecutar `nest build`
-RUN npm install -g @nestjs/cli
+# Generar el cliente de Prisma (necesario antes del build)
+RUN npx prisma generate
 
 # Compilar la aplicación
 RUN npm run build
 
-# Build bcrypt desde fuente para evitar problemas con glibc en Alpine
-RUN apk --no-cache add --virtual builds-dependencies build-base python3 make \
-    && npm install bcrypt \
-    && npm rebuild bcrypt --build-from-source
+# Etapa de producción
+FROM node:20-alpine AS production
 
-# ---------------------------------------------------------
+# Instalar dependencias necesarias para producción
+RUN apk add --no-cache libc6-compat openssl
 
-FROM node:20-alpine
+WORKDIR /app
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+# Copiar solo los archivos necesarios para producción
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
 
-WORKDIR /usr/src/app
+COPY --from=development /app/dist ./dist
+COPY --from=development /app/node_modules ./node_modules
+COPY --from=development /app/prisma ./prisma
+COPY --from=development /app/generated ./generated
 
-# Copiar solo lo necesario desde el builder
-COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-COPY --from=builder /usr/src/app/package*.json ./
+# Asegurar que Prisma funcione en producción
+RUN npx prisma generate
 
+# Exponer el puerto
 EXPOSE 3000
 
-# Comando para ejecutar la aplicación
+# Comando de arranque
 CMD ["node", "dist/main"]
