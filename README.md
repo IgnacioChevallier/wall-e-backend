@@ -240,3 +240,4 @@ JWT_SECRET=your-secret-key
 
 # esto va antes de hacer docker compose, ahora q metí la imagen de eva-bank
 echo <TU_TOKEN> | docker login ghcr.io -u <tu_usuario_github> --password-stdin
+docker pull ghcr.io/matichialvaa/eva-bank:latest 
