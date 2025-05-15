@@ -18,6 +18,7 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
+  alias     String   @unique
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -25,21 +26,39 @@ model User {
 }
 
 model Wallet {
-  id           String        @id @default(uuid())
-  balance      Float         @default(0)
-  userId       String        @unique
-  user         User          @relation(fields: [userId], references: [id])
-  transactions Transaction[]
+  id                      String        @id @default(uuid())
+  balance                 Float         @default(0)
+  userId                  String        @unique
+  user                    User          @relation(fields: [userId], references: [id])
+  
+  // Transactions initiated from this wallet (money sent out)
+  initiatedTransactions   Transaction[] @relation("SenderWallet")
+  // Transactions received by this wallet (money came in)
+  receivedTransactions    Transaction[] @relation("ReceiverWallet")
+  // All transactions involving this wallet (can be used for a general ledger view)
+  allTransactions         Transaction[] @relation("EffectedWallet")
 }
 
 model Transaction {
-  id          String          @id @default(uuid())
-  amount      Float
-  type        TransactionType
-  description String?
-  createdAt   DateTime        @default(now())
-  walletId    String
-  wallet      Wallet          @relation(fields: [walletId], references: [id])
+  id               String          @id @default(uuid())
+  amount           Float
+  type             TransactionType
+  description      String?
+  createdAt        DateTime        @default(now())
+
+  // For P2P, who initiated the transfer
+  senderWalletId   String
+  senderWallet     Wallet          @relation("SenderWallet", fields: [senderWalletId], references: [id])
+
+  // For P2P, who received the transfer
+  receiverWalletId String
+  receiverWallet   Wallet          @relation("ReceiverWallet", fields: [receiverWalletId], references: [id])
+  
+  // Which wallet's balance was directly affected by this specific transaction record.
+  // For an 'OUT' transaction type from sender, this is senderWalletId.
+  // For an 'IN' transaction type to receiver, this is receiverWalletId.
+  effectedWalletId String
+  effectedWallet   Wallet          @relation("EffectedWallet", fields: [effectedWalletId], references: [id])
 }
 
 enum TransactionType {

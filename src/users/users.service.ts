@@ -17,8 +17,22 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, dto: UpdateUserDto): Promise<User> {
-    return await (this.prisma.user as any).update({
+  async findByEmailOrAlias(identifier: string): Promise<User | null> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ email: identifier }, { alias: identifier }],
+      },
+    });
+    if (!user) {
+      throw new NotFoundException(
+        `User with email or alias ${identifier} not found`,
+      );
+    }
+    return user;
+  }
+
+  async update(id: string, dto: UpdateUserDto) {
+    return this.prisma.user.update({
       where: { id },
       data: { ...dto },
     });
