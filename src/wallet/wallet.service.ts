@@ -8,10 +8,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Wallet } from '../../generated/prisma';
 import { AddMoneyDto, PaymentMethod } from './dto/add-money.dto';
 import { WithdrawMoneyDto } from './dto/withdraw-money.dto';
+import { ExternalBankService } from '../external-bank/external-bank.service';
 
 @Injectable()
 export class WalletService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private externalBankService: ExternalBankService,
+  ) {}
 
   create(userId: string) {
     return this.prisma.wallet.create({
@@ -97,8 +101,18 @@ export class WalletService {
   async addMoney(userId: string, addMoneyDto: AddMoneyDto) {
     const wallet = await this.getWalletByUserId(userId);
 
-    // Simular validación del medio de pago
-    this.validatePaymentMethod(addMoneyDto);
+    // Verificar con el servicio externo simulado
+    const externalResponse = await this.externalBankService.Transfer({
+      amount: addMoneyDto.amount,
+      toWalletId: wallet.id,
+      source: addMoneyDto.sourceIdentifier || 'unknown',
+    });
+
+    if (!externalResponse.success) {
+      throw new BadRequestException(
+        externalResponse.error || 'External transfer failed',
+      );
+    }
 
     // Usar una transacción de base de datos para asegurar consistencia
     const result = await this.prisma.$transaction(async (prisma) => {
@@ -158,19 +172,21 @@ export class WalletService {
     return result;
   }
 
-  async withdrawMoney(userId: string, withdrawDto: WithdrawMoneyDto) {
+  async requestDebin(userId: string, amount: number) {
     const wallet = await this.getWalletByUserId(userId);
 
-    if (wallet.balance < withdrawDto.amount) {
-      throw new BadRequestException('Insufficient funds');
+    // Solicitar DEBIN al servicio externo
+    const debinResponse = await this.externalBankService.ExecuteDebin({
+      amount,
+      toWalletId: wallet.id,
+    });
+
+    if (!debinResponse.approved) {
+      throw new BadRequestException('DEBIN request was not approved');
     }
 
-    // Simular validación de la cuenta bancaria
-    this.validateBankAccount(withdrawDto.bankAccount);
-
-    // Usar una transacción de base de datos para asegurar consistencia
+    // Si el DEBIN fue aprobado, proceder con la transacción
     const result = await this.prisma.$transaction(async (prisma) => {
-      // Primero creamos o buscamos una wallet del sistema para representar el destino externo
       const systemWallet =
         (await prisma.wallet.findFirst({
           where: { userId: 'SYSTEM' },
@@ -182,30 +198,28 @@ export class WalletService {
           },
         }));
 
-      // Crear la transacción
       const transaction = await prisma.transaction.create({
         data: {
-          amount: -withdrawDto.amount, // Monto negativo para retiros
-          type: 'OUT',
-          description: `Withdrawal to bank account ${withdrawDto.bankAccount}`,
+          amount: amount,
+          type: 'IN',
+          description: `DEBIN transfer approved`,
           effectedWallet: {
             connect: { id: wallet.id },
           },
           senderWallet: {
-            connect: { id: wallet.id },
+            connect: { id: systemWallet.id },
           },
           receiverWallet: {
-            connect: { id: systemWallet.id },
+            connect: { id: wallet.id },
           },
         },
       });
 
-      // Actualizar el balance de la wallet
       const updatedWallet = await prisma.wallet.update({
         where: { id: wallet.id },
         data: {
           balance: {
-            decrement: withdrawDto.amount,
+            increment: amount,
           },
         },
         include: {
@@ -224,21 +238,5 @@ export class WalletService {
     });
 
     return result;
-  }
-
-  private validatePaymentMethod(addMoneyDto: AddMoneyDto): void {
-    if (addMoneyDto.amount <= 0) {
-      throw new BadRequestException('Amount must be greater than 0');
-    }
-    // Aquí iría la lógica de validación específica para cada método de pago
-    return;
-  }
-
-  private validateBankAccount(bankAccount: string): void {
-    if (!bankAccount) {
-      throw new BadRequestException('Bank account is required');
-    }
-    // Aquí iría la lógica de validación específica para cuentas bancarias
-    return;
   }
 }

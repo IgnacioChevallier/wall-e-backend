@@ -6,6 +6,8 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      BANK_SERVICE_URL: http://eva-bank:3001 # hardcodeado por ahora, podría ir en el .env
     depends_on:
       - db
     volumes:
@@ -23,6 +25,13 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  # External bank service -> lo levanto usando la imagen de dockerhub
+  eva-bank:
+    image: ghcr.io/matichialvaa/eva-bank:latest
+    container_name: eva-bank
+    ports:
+      - "3001:3001"
 
 volumes:
   postgres_data:

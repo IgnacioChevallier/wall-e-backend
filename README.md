@@ -172,3 +172,72 @@ Check out a few resources that may come in handy when working with NestJS:
 - Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
 - To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
 - Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+
+# Wallet Backend
+
+## External Bank Integration
+
+The system includes a simulated external bank service that handles two main operations:
+
+1. Manual Bank Transfer
+- Endpoint: `POST /bank/transfer`
+- Used when users want to add money to their wallet from an external source
+- Success rate: 90%
+- Simulated processing time: 1 second
+
+2. DEBIN (Débito Inmediato)
+- Endpoint: `POST /bank/debin-request`
+- Used when users want to request a direct debit from their bank account
+- Approval rate: 80%
+- Simulated processing time: 1.5 seconds
+
+### How to Use
+
+1. Manual Transfer:
+```bash
+curl -X POST http://localhost:3000/wallet/topup/manual \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "amount": 100,
+    "method": "BANK_TRANSFER",
+    "sourceIdentifier": "bank_account_123"
+  }'
+```
+
+2. DEBIN Request:
+```bash
+curl -X POST http://localhost:3000/wallet/topup/debin \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "amount": 100
+  }'
+```
+
+## Running the Services
+
+The project uses Docker Compose to run multiple services:
+
+1. Main API (port 3000)
+2. External Bank Service (port 3001)
+3. PostgreSQL Database (port 5432)
+
+To start all services:
+
+```bash
+docker-compose up --build
+```
+
+## Environment Variables
+
+Create a `.env` file with:
+
+```
+DATABASE_URL=postgresql://postgres:postgres@db:5432/walle?schema=public
+JWT_SECRET=your-secret-key
+```
+
+# esto va antes de hacer docker compose, ahora q metí la imagen de eva-bank
+echo <TU_TOKEN> | docker login ghcr.io -u <tu_usuario_github> --password-stdin
+docker pull ghcr.io/matichialvaa/eva-bank:latest 

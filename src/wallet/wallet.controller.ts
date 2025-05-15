@@ -59,8 +59,13 @@ export class WalletController {
     return this.walletService.addMoney(req.user.sub, addMoneyDto);
   }
 
-  @Post('withdraw')
-  async withdrawMoney(@Request() req, @Body() withdrawDto: WithdrawMoneyDto) {
-    return this.walletService.withdrawMoney(req.user.sub, withdrawDto);
+  @Post('topup/manual')
+  async addMoneyManual(@Request() req, @Body() addMoneyDto: AddMoneyDto) {
+    return this.walletService.addMoney(req.user.id, addMoneyDto);
+  }
+
+  @Post('topup/debin')
+  async requestDebin(@Request() req, @Body() data: { amount: number }) {
+    return this.walletService.requestDebin(req.user.id, data.amount);
   }
 }
