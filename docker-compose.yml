@@ -1,41 +1,36 @@
-version: '3.8'
-
 services:
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  app:
+    build: .
+    container_name: walle-app
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres?schema=public
-      - JWT_SECRET=your-secret-key
-      - BANK_SERVICE_URL=http://bank:3001
+      DATABASE_URL: ${DATABASE_URL}
+      BANK_SERVICE_URL: http://eva-bank:3001 # hardcodeado por ahora, podría ir en el .env
     depends_on:
       - db
-      - bank
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
 
   db:
-    image: postgres:13
+    image: postgres:15-alpine
     container_name: walle-db
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  bank:
-    build:
-      context: ../bank-service
-      dockerfile: Dockerfile
+  # External bank service -> lo levanto usando la imagen de dockerhub
+  eva-bank:
+    image: ghcr.io/matichialvaa/eva-bank:latest
     container_name: eva-bank
     ports:
       - "3001:3001"
-    environment:
-      - PORT=3001
 
 volumes:
   postgres_data:
