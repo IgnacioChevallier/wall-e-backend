@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Request,
+  Post,
 } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { CreateWalletDto } from './dto/create-wallet.dto';
