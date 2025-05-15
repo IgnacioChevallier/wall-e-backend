@@ -1,7 +1,8 @@
+# Etapa de construcción
 FROM node:20-alpine AS builder
 
-# Definir argumentos de construcción
 ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /usr/src/app
 
@@ -12,15 +13,19 @@ RUN npm ci
 
 COPY . .
 
-# Depuración: Verificar binarios y dependencias
-RUN ls -l node_modules/.bin && npx --version && npm list @nestjs/cli
+# Depuración: Verificar binarios y dependencias (sin romper el build si falta @nestjs/cli)
+RUN ls -l node_modules/.bin && npx --version && (npm list @nestjs/cli || echo "@nestjs/cli no está instalado")
 
-# Establecer NODE_ENV durante la construcción
+# Compilar la aplicación
 RUN npm run build
 
-# Build bcrypt from source to avoid glibc issues on Alpine
-RUN apk --no-cache add --virtual builds-dependencies build-base python3 make && npm i bcrypt && npm rebuild bcrypt --build-from-source  
+# Build bcrypt desde fuente para evitar problemas con glibc en Alpine
+RUN apk --no-cache add --virtual builds-dependencies build-base python3 make && \
+    npm i bcrypt && \
+    npm rebuild bcrypt --build-from-source && \
+    apk del builds-dependencies
 
+# Etapa final: imagen más liviana para producción
 FROM node:20-alpine
 
 ARG NODE_ENV=production
@@ -34,5 +39,4 @@ COPY --from=builder /usr/src/app/package*.json ./
 
 EXPOSE 3000
 
-# Command to run the application
 CMD ["node", "dist/main"]
