@@ -12,9 +12,6 @@ RUN npm ci
 
 COPY . .
 
-# Depuración: Verificar binarios y dependencias
-RUN ls -l node_modules/.bin && npx --version && npm list @nestjs/cli
-
 # Establecer NODE_ENV durante la construcción
 RUN npm run build
 
