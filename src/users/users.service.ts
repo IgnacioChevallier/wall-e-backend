@@ -9,27 +9,27 @@ import * as bcrypt from 'bcrypt';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateUserDto): Promise<User> {
-    let { email, password, alias } = dto;
-    if (!alias) { alias = generateAlias(email); }
-  
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const { email, password, alias: initialAlias } = createUserDto;
+    const alias = initialAlias || generateAlias(email);
+
     const hashedPassword = await bcrypt.hash(password, 10);
     return this.prisma.user.create({
-      data: { 
-        email, 
-        password: hashedPassword, 
-        alias, 
-        wallet: { create: { balance: 0 } } 
+      data: {
+        email,
+        password: hashedPassword,
+        alias,
+        wallet: { create: { balance: 0 } },
       },
     });
   }
 
   async findAll(): Promise<User[]> {
-    return this.prisma.user.findMany();
+    return await (this.prisma.user as any).findMany();
   }
 
-  async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+  async findOne(id: string): Promise<User> {
+    const user = await (this.prisma.user as any).findUnique({ where: { id } });
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
     return user;
   }
@@ -63,8 +63,8 @@ export class UsersService {
     });
   }
 
-  async remove(id: string) {
-    return this.prisma.user.delete({ where: { id } });
+  async remove(id: string): Promise<User> {
+    return await (this.prisma.user as any).delete({ where: { id } });
   }
 }
 

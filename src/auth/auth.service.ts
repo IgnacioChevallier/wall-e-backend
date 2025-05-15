@@ -1,4 +1,9 @@
-import { Injectable, ConflictException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
@@ -21,15 +26,19 @@ export class AuthService {
   async register(createUserDto: CreateUserDto): Promise<AuthResponse> {
     const { email, password, alias } = createUserDto;
 
-    const existingUserByEmail = await this.usersService.findByEmail(email).catch(() => null);
+    const existingUserByEmail = await this.usersService
+      .findByEmail(email)
+      .catch(() => null);
     if (existingUserByEmail) {
       throw new ConflictException('Email already exists');
     }
     if (alias) {
-        const existingUserByAlias = await this.usersService.findByAlias(alias).catch(() => null);
-        if (existingUserByAlias) {
-            throw new ConflictException('Alias already exists');
-        }
+      const existingUserByAlias = await this.usersService
+        .findByAlias(alias)
+        .catch(() => null);
+      if (existingUserByAlias) {
+        throw new ConflictException('Alias already exists');
+      }
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -41,17 +50,21 @@ export class AuthService {
         alias,
       });
 
-      const { password: _, ...userWithoutPassword } = user; 
+      const { password: _, ...userWithoutPassword } = user;
       const payload = { email: user.email, userId: user.id };
       const accessToken = this.jwtService.sign(payload);
 
       return { accessToken, user: userWithoutPassword };
     } catch (error) {
-      if (error.code === 'P2002') { 
-        throw new ConflictException('User with this email or alias already exists (from database constraint).');
+      if (error.code === 'P2002') {
+        throw new ConflictException(
+          'User with this email or alias already exists (from database constraint).',
+        );
       }
-      console.error("Error during user registration:", error);
-      throw new InternalServerErrorException('Could not create user due to an unexpected error.');
+      console.error('Error during user registration:', error);
+      throw new InternalServerErrorException(
+        'Could not create user due to an unexpected error.',
+      );
     }
   }
 
@@ -60,7 +73,11 @@ export class AuthService {
     // This will still error if findByEmail is not in UsersService
     const user = await this.usersService.findByEmail(email);
 
-    if (user && user.password && (await bcrypt.compare(password, user.password))) {
+    if (
+      user &&
+      user.password &&
+      (await bcrypt.compare(password, user.password))
+    ) {
       const { password: _, ...userWithoutPassword } = user;
       const payload = { email: user.email, userId: user.id };
       const accessToken = this.jwtService.sign(payload);

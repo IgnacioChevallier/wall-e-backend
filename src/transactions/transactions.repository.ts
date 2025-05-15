@@ -15,8 +15,17 @@ export interface P2PTransactionData {
 export class TransactionsRepository {
   constructor(private prisma: PrismaService) {}
 
-  async createP2PTransfer(data: P2PTransactionData): Promise<{ senderTransaction: Transaction, recipientTransaction: Transaction}> {
-    const { amount, senderWallet, recipientWallet, senderDescription, recipientDescription } = data;
+  async createP2PTransfer(data: P2PTransactionData): Promise<{
+    senderTransaction: Transaction;
+    recipientTransaction: Transaction;
+  }> {
+    const {
+      amount,
+      senderWallet,
+      recipientWallet,
+      senderDescription,
+      recipientDescription,
+    } = data;
 
     return this.prisma.$transaction(async (tx) => {
       // 1. Decrement sender's balance
@@ -39,7 +48,7 @@ export class TransactionsRepository {
           description: senderDescription,
           senderWalletId: senderWallet.id,
           receiverWalletId: recipientWallet.id,
-          effectedWalletId: senderWallet.id, 
+          effectedWalletId: senderWallet.id,
         },
       });
 

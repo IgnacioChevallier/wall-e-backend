@@ -1,11 +1,16 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { P2PTransferDto } from './dto/p2p-transfer.dto';
 import { UsersService } from '../users/users.service';
 import { WalletService } from '../wallet/wallet.service';
 import { TransactionsRepository } from './transactions.repository';
-import { Transaction, User } from '../../generated/prisma';
+import { User } from '../../generated/prisma';
+import { Transaction, Prisma } from '../../generated/prisma';
 
 @Injectable()
 export class TransactionsService {
@@ -31,20 +36,22 @@ export class TransactionsService {
     // 2. Fetch recipient by email (as per requirement)
     let recipient: User | null = null;
     try {
-      recipient = await this.usersService.findByEmailOrAlias(recipientIdentifier);
+      recipient =
+        await this.usersService.findByEmailOrAlias(recipientIdentifier);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(
-          `Recipient with email ${recipientIdentifier} not found.`, 
+          `Recipient with email ${recipientIdentifier} not found.`,
         );
       }
       throw error; // Re-throw other errors
     }
 
-    if (!recipient) { // Should be caught by findByEmail, but as a safeguard
-        throw new NotFoundException(
-            `Recipient with email ${recipientIdentifier} not found.`,
-        );
+    if (!recipient) {
+      // Should be caught by findByEmail, but as a safeguard
+      throw new NotFoundException(
+        `Recipient with email ${recipientIdentifier} not found.`,
+      );
     }
 
     if (sender.id === recipient.id) {
@@ -54,28 +61,35 @@ export class TransactionsService {
     // 3. Fetch sender's wallet
     const senderWallet = await this.walletService.getWalletByUserId(sender.id);
     if (!senderWallet) {
-        throw new NotFoundException(`Wallet for sender ${sender.id} not found. Please ensure the sender has a wallet.`);
+      throw new NotFoundException(
+        `Wallet for sender ${sender.id} not found. Please ensure the sender has a wallet.`,
+      );
     }
-    
+
     //if (senderWallet.balance < amount) {
-      //throw new BadRequestException('Insufficient funds.');
+    //throw new BadRequestException('Insufficient funds.');
     //}
 
     // 4. Fetch recipient's wallet
-    const recipientWallet = await this.walletService.getWalletByUserId(recipient.id);
+    const recipientWallet = await this.walletService.getWalletByUserId(
+      recipient.id,
+    );
     if (!recipientWallet) {
-      throw new NotFoundException(`Wallet for recipient ${recipient.email} not found. Please ensure the recipient has a wallet.`);
+      throw new NotFoundException(
+        `Wallet for recipient ${recipient.email} not found. Please ensure the recipient has a wallet.`,
+      );
     }
 
     // 5. Perform the transfer using the repository
     try {
-      const { senderTransaction, recipientTransaction } = await this.transactionsRepository.createP2PTransfer({
-        amount,
-        senderWallet,
-        recipientWallet,
-        senderDescription: `Transfer to ${recipient.email}`,
-        recipientDescription: `Transfer from ${sender.email}`,
-      });
+      const { senderTransaction, recipientTransaction } =
+        await this.transactionsRepository.createP2PTransfer({
+          amount,
+          senderWallet,
+          recipientWallet,
+          senderDescription: `Transfer to ${recipient.email}`,
+          recipientDescription: `Transfer from ${sender.email}`,
+        });
 
       return {
         message: 'Transfer successful',
@@ -84,27 +98,30 @@ export class TransactionsService {
       };
     } catch (error) {
       // Log the error for debugging
-      console.error("P2P Transfer failed:", error);
+      console.error('P2P Transfer failed:', error);
       // Re-throw a generic error or a more specific one based on the type of error
-      throw new BadRequestException('P2P Transfer failed. Please try again later.');
+      throw new BadRequestException(
+        'P2P Transfer failed. Please try again later.',
+      );
     }
   }
 
-  async create(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
+  async create(
+    createTransactionDto: CreateTransactionDto,
+  ): Promise<Transaction> {
     const { amount, type, walletId, description } = createTransactionDto;
-    return this.prisma.transaction.create({
+    return await this.prisma.transaction.create({
       data: {
         amount,
         type,
         walletId,
         description,
-        // wallet: { connect: { id: walletId } } // Alternative way to connect to wallet if needed
       },
     });
   }
 
   async findAll(): Promise<Transaction[]> {
-    return this.prisma.transaction.findMany();
+    return await this.prisma.transaction.findMany();
   }
 
   async findOne(id: string): Promise<Transaction> {
@@ -117,15 +134,23 @@ export class TransactionsService {
     return transaction;
   }
 
-  async update(id: string, updateTransactionDto: UpdateTransactionDto): Promise<Transaction> {
+  async update(
+    id: string,
+    updateTransactionDto: UpdateTransactionDto,
+  ): Promise<Transaction> {
     try {
       return await this.prisma.transaction.update({
         where: { id },
         data: updateTransactionDto,
       });
-    } catch (error: any) { // Added :any for error.code access
-      if (error && error.code === 'P2025') {
-        throw new NotFoundException(`Transaction with ID #${id} not found for update`);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(
+          `Transaction with ID #${id} not found for update`,
+        );
       }
       throw error;
     }
@@ -136,9 +161,14 @@ export class TransactionsService {
       return await this.prisma.transaction.delete({
         where: { id },
       });
-    } catch (error: any) {
-      if (error && error.code === 'P2025') {
-        throw new NotFoundException(`Transaction with ID #${id} not found for deletion`);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException(
+          `Transaction with ID #${id} not found for deletion`,
+        );
       }
       throw error;
     }

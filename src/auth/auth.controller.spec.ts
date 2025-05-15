@@ -1,40 +1,39 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { UserRepository } from '../users/user.repository';
 import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
+import { UsersModule } from '../users/users.module';
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let service: AuthService;
-
-  const mockUserRepository = {
-    findUserByEmail: jest.fn(),
-    createUser: jest.fn(),
-  };
-
-  const mockJwtService = {
-    signAsync: jest.fn(),
-  };
+  let mockUsersService: Partial<UsersService>;
 
   beforeEach(async () => {
+    mockUsersService = {
+      findByEmail: jest.fn(),
+      findByEmailOrAlias: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
+      imports: [UsersModule],
       controllers: [AuthController],
       providers: [
         AuthService,
         {
-          provide: UserRepository,
-          useValue: mockUserRepository,
+          provide: UsersService,
+          useValue: mockUsersService,
         },
         {
           provide: JwtService,
-          useValue: mockJwtService,
+          useValue: {
+            sign: jest.fn(),
+          },
         },
       ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
-    service = module.get<AuthService>(AuthService);
   });
 
   it('should be defined', () => {

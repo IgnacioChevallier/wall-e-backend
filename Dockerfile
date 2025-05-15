@@ -1,10 +1,23 @@
 FROM node:20-alpine AS builder
 
+# Definir argumentos de construcción
+ARG NODE_ENV=production
+
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
+# Instalar dependencias según el entorno
+RUN if [ "$NODE_ENV" = "production" ]; then \
+    npm ci --only=production; \
+    else \
+    npm ci; \
+    fi
+
 COPY . .
+
+# Establecer NODE_ENV durante la construcción
+ENV NODE_ENV=${NODE_ENV}
 
 RUN npm run build
 
@@ -12,6 +25,9 @@ RUN npm run build
 RUN apk --no-cache add --virtual builds-dependencies build-base python3 make && npm i bcrypt && npm rebuild bcrypt --build-from-source  
 
 FROM node:20-alpine
+
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /usr/src/app
 

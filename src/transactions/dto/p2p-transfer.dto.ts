@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsNumber, IsPositive, IsString, Min } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsPositive,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class P2PTransferDto {
   @IsString()
@@ -9,4 +15,4 @@ export class P2PTransferDto {
   @Min(0.01)
   @IsPositive()
   amount: number;
-} 
+}

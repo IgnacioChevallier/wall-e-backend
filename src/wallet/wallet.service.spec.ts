@@ -5,7 +5,6 @@ import { NotFoundException } from '@nestjs/common';
 
 describe('WalletService', () => {
   let service: WalletService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     wallet: {
@@ -25,7 +24,6 @@ describe('WalletService', () => {
     }).compile();
 
     service = module.get<WalletService>(WalletService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {
@@ -48,7 +46,6 @@ describe('WalletService', () => {
       expect(result).toBe(100);
       expect(mockPrismaService.wallet.findUnique).toHaveBeenCalledWith({
         where: { userId },
-        select: { balance: true },
       });
     });
 
@@ -60,7 +57,6 @@ describe('WalletService', () => {
       );
       expect(mockPrismaService.wallet.findUnique).toHaveBeenCalledWith({
         where: { userId },
-        select: { balance: true },
       });
     });
   });
@@ -91,7 +87,7 @@ describe('WalletService', () => {
       expect(mockPrismaService.wallet.findUnique).toHaveBeenCalledWith({
         where: { userId },
         include: {
-          transactions: {
+          allTransactions: {
             orderBy: { createdAt: 'desc' },
             take: 10,
           },
@@ -108,7 +104,7 @@ describe('WalletService', () => {
       expect(mockPrismaService.wallet.findUnique).toHaveBeenCalledWith({
         where: { userId },
         include: {
-          transactions: {
+          allTransactions: {
             orderBy: { createdAt: 'desc' },
             take: 10,
           },

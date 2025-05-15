@@ -8,4 +8,4 @@ export class WithdrawMoneyDto {
   @IsNotEmpty()
   @IsString()
   bankAccount: string; // CBU/Alias de la cuenta de destino
-} 
+}
