@@ -13,9 +13,7 @@ export class ExternalBankController {
   }
 
   @Post('/debin-request')
-  async simulateDebin(
-    @Body() data: { amount: number; toWalletId: string },
-  ) {
+  async simulateDebin(@Body() data: { amount: number; toWalletId: string }) {
     return this.externalBankService.ExecuteDebin(data);
   }
-} 
+}

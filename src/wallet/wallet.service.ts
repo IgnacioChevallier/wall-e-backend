@@ -171,7 +171,6 @@ export class WalletService {
 
     return result;
   }
-  
 
   async requestDebin(userId: string, amount: number) {
     const wallet = await this.getWalletByUserId(userId);
@@ -240,6 +239,4 @@ export class WalletService {
 
     return result;
   }
-
-
 }

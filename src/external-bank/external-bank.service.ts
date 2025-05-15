@@ -13,10 +13,10 @@ import {
 export class ExternalBankService {
   private readonly bankApiUrl: string;
 
-  constructor(
-    private readonly configService: ConfigService,
-  ) {
-    this.bankApiUrl = this.configService.get<string>('BANK_API_URL') || 'http://bank-service:3001';
+  constructor(private readonly configService: ConfigService) {
+    this.bankApiUrl =
+      this.configService.get<string>('BANK_API_URL') ||
+      'http://bank-service:3001';
   }
 
   async Transfer(data: BankTransferRequest): Promise<BankTransferResponse> {
@@ -54,4 +54,4 @@ export class ExternalBankService {
       throw error;
     }
   }
-} 
+}

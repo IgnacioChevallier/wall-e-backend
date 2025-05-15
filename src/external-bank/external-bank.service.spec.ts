@@ -71,7 +71,7 @@ describe('ExternalBankService', () => {
       mockedAxios.post.mockRejectedValue(errorResponse);
       mockedAxios.isAxiosError.mockReturnValue(true);
 
-      await expect(service.Transfer(transferRequest)).rejects.toThrow(
+      await expect(() => service.Transfer(transferRequest)).rejects.toThrow(
         HttpException,
       );
     });
@@ -116,9 +116,8 @@ describe('ExternalBankService', () => {
       mockedAxios.post.mockRejectedValue(errorResponse);
       mockedAxios.isAxiosError.mockReturnValue(true);
 
-      await expect(service.ExecuteDebin(debinRequest)).rejects.toThrow(
-        HttpException,
-      );
+      const debinPromise = () => service.ExecuteDebin(debinRequest);
+      await expect(debinPromise()).rejects.toThrow(HttpException);
     });
   });
-}); 
+});

@@ -7,4 +7,4 @@ import { ExternalBankService } from './external-bank.service';
   providers: [ExternalBankService],
   exports: [ExternalBankService],
 })
-export class ExternalBankModule {} 
+export class ExternalBankModule {}
