@@ -11,11 +11,12 @@ import { WalletService } from '../wallet/wallet.service';
 import { TransactionsRepository } from './transactions.repository';
 import { User } from '../../generated/prisma';
 import { Transaction, Prisma } from '../../generated/prisma';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class TransactionsService {
-  prisma: any;
   constructor(
+    private prisma: PrismaService,
     private usersService: UsersService,
     private walletService: WalletService,
     private transactionsRepository: TransactionsRepository,
@@ -110,12 +111,16 @@ export class TransactionsService {
     createTransactionDto: CreateTransactionDto,
   ): Promise<Transaction> {
     const { amount, type, walletId, description } = createTransactionDto;
+    
+    // When creating a single transaction, we set the same wallet as sender, receiver, and effected
     return await this.prisma.transaction.create({
       data: {
         amount,
         type,
-        walletId,
         description,
+        senderWalletId: walletId,
+        receiverWalletId: walletId,
+        effectedWalletId: walletId,
       },
     });
   }
