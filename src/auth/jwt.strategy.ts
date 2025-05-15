@@ -18,7 +18,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     const secret = configService.get<string>('JWT_SECRET');
     if (!secret) {
-      throw new Error('JWT_SECRET not found in configuration. Please set it in your .env file or environment variables.');
+      throw new Error(
+        'JWT_SECRET not found in configuration. Please set it in your .env file or environment variables.',
+      );
     }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -35,7 +37,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException('User not found or deactivated');
     }
-    
+
     return { id: user.id, email: user.email, alias: user.alias };
   }
-} 
+}

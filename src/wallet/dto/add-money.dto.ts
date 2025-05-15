@@ -4,7 +4,7 @@ import { IsNotEmpty, IsNumber, IsString, IsEnum } from 'class-validator';
 export enum PaymentMethod {
   BANK_ACCOUNT = 'BANK_ACCOUNT',
   CREDIT_CARD = 'CREDIT_CARD',
-  DEBIT_CARD = 'DEBIT_CARD'
+  DEBIT_CARD = 'DEBIT_CARD',
 }
 
 export class AddMoneyDto {
@@ -17,5 +17,5 @@ export class AddMoneyDto {
   method: PaymentMethod;
 
   @IsString()
-  sourceIdentifier?: string; // CBU/Alias 
-} 
+  sourceIdentifier?: string; // CBU/Alias
+}

@@ -9,17 +9,17 @@ import * as bcrypt from 'bcrypt';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateUserDto): Promise<User> {
-    let { email, password, alias } = dto;
-    if (!alias) { alias = generateAlias(email); }
-  
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const { email, password, alias: initialAlias } = createUserDto;
+    const alias = initialAlias || generateAlias(email);
+
     const hashedPassword = await bcrypt.hash(password, 10);
     return this.prisma.user.create({
-      data: { 
-        email, 
-        password: hashedPassword, 
-        alias, 
-        wallet: { create: { balance: 0 } } 
+      data: {
+        email,
+        password: hashedPassword,
+        alias,
+        wallet: { create: { balance: 0 } },
       },
     });
   }

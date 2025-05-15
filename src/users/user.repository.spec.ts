@@ -84,15 +84,18 @@ describe('UserRepository', () => {
     it('should create user with wallet', async () => {
       mockPrismaService.user.create.mockResolvedValue(mockCreatedUser);
 
-      const result = await repository.createUser(email, password);
+      const result = await repository.createUser(email, password, 'test_alias');
 
       expect(result).toEqual(mockCreatedUser);
       expect(mockPrismaService.user.create).toHaveBeenCalledWith({
         data: {
           email,
           password,
+          alias: 'test_alias',
           wallet: {
-            create: { balance: 0 },
+            create: {
+              balance: 0,
+            },
           },
         },
         include: { wallet: true },

@@ -1,4 +1,12 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, Matches, MaxLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  IsOptional,
+  Matches,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateUserDto {
   @IsEmail()
@@ -21,4 +29,4 @@ export class CreateUserDto {
     message: 'Alias can only contain alphanumeric characters and underscores',
   })
   alias?: string;
-} 
+}

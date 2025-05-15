@@ -1,31 +1,32 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
-import { UserRepository } from '../users/user.repository';
 import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
+import { UsersModule } from '../users/users.module';
 
 describe('AuthService', () => {
   let service: AuthService;
-
-  const mockUserRepository = {
-    findUserByEmail: jest.fn(),
-    createUser: jest.fn(),
-  };
-
-  const mockJwtService = {
-    signAsync: jest.fn(),
-  };
+  let mockUsersService: Partial<UsersService>;
 
   beforeEach(async () => {
+    mockUsersService = {
+      findByEmail: jest.fn(),
+      findByEmailOrAlias: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
+      imports: [UsersModule],
       providers: [
         AuthService,
         {
-          provide: UserRepository,
-          useValue: mockUserRepository,
+          provide: UsersService,
+          useValue: mockUsersService,
         },
         {
           provide: JwtService,
-          useValue: mockJwtService,
+          useValue: {
+            sign: jest.fn(),
+          },
         },
       ],
     }).compile();

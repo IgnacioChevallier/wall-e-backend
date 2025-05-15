@@ -87,7 +87,7 @@ describe('WalletService', () => {
       expect(mockPrismaService.wallet.findUnique).toHaveBeenCalledWith({
         where: { userId },
         include: {
-          transactions: {
+          allTransactions: {
             orderBy: { createdAt: 'desc' },
             take: 10,
           },
@@ -104,7 +104,7 @@ describe('WalletService', () => {
       expect(mockPrismaService.wallet.findUnique).toHaveBeenCalledWith({
         where: { userId },
         include: {
-          transactions: {
+          allTransactions: {
             orderBy: { createdAt: 'desc' },
             take: 10,
           },

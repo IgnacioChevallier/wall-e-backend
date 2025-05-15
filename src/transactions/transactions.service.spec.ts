@@ -1,27 +1,42 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionsService } from './transactions.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { WalletService } from '../wallet/wallet.service';
+import { TransactionsRepository } from './transactions.repository';
+import { UsersService } from '../users/users.service';
+import { UsersModule } from '../users/users.module';
 
 describe('TransactionsService', () => {
   let service: TransactionsService;
-
-  const mockPrismaService = {
-    transaction: {
-      create: jest.fn(),
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-    },
-  };
+  let mockUsersService: Partial<UsersService>;
 
   beforeEach(async () => {
+    mockUsersService = {
+      findByEmail: jest.fn(),
+      findByEmailOrAlias: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
+      imports: [UsersModule],
       providers: [
         TransactionsService,
         {
-          provide: PrismaService,
-          useValue: mockPrismaService,
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: WalletService,
+          useValue: {
+            getWalletByUserId: jest.fn(),
+            updateWalletBalance: jest.fn(),
+          },
+        },
+        {
+          provide: TransactionsRepository,
+          useValue: {
+            create: jest.fn(),
+            findAll: jest.fn(),
+            findOne: jest.fn(),
+          },
         },
       ],
     }).compile();

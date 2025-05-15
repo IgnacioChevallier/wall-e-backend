@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Wallet } from '../../generated/prisma';
@@ -68,7 +72,11 @@ export class WalletService {
     return wallet;
   }
 
-  async updateWalletBalance(userId: string, amount: number, operation: 'increment' | 'decrement'): Promise<Wallet> {
+  async updateWalletBalance(
+    userId: string,
+    amount: number,
+    operation: 'increment' | 'decrement',
+  ): Promise<Wallet> {
     const wallet = await this.getWalletByUserId(userId);
 
     const newBalance =
@@ -90,19 +98,21 @@ export class WalletService {
     const wallet = await this.getWalletByUserId(userId);
 
     // Simular validación del medio de pago
-    await this.validatePaymentMethod(addMoneyDto);
+    this.validatePaymentMethod(addMoneyDto);
 
     // Usar una transacción de base de datos para asegurar consistencia
     const result = await this.prisma.$transaction(async (prisma) => {
       // Primero creamos o buscamos una wallet del sistema para representar el origen externo
-      const systemWallet = await prisma.wallet.findFirst({
-        where: { userId: 'SYSTEM' }
-      }) || await prisma.wallet.create({
-        data: {
-          userId: 'SYSTEM',
-          balance: 0
-        }
-      });
+      const systemWallet =
+        (await prisma.wallet.findFirst({
+          where: { userId: 'SYSTEM' },
+        })) ||
+        (await prisma.wallet.create({
+          data: {
+            userId: 'SYSTEM',
+            balance: 0,
+          },
+        }));
 
       // Crear la transacción
       const transaction = await prisma.transaction.create({
@@ -111,15 +121,15 @@ export class WalletService {
           type: 'IN',
           description: `Deposit via ${addMoneyDto.method} - ${addMoneyDto.sourceIdentifier || 'Unknown source'}`,
           effectedWallet: {
-            connect: { id: wallet.id }
+            connect: { id: wallet.id },
           },
           senderWallet: {
-            connect: { id: systemWallet.id }
+            connect: { id: systemWallet.id },
           },
           receiverWallet: {
-            connect: { id: wallet.id }
-          }
-        }
+            connect: { id: wallet.id },
+          },
+        },
       });
 
       // Actualizar el balance de la wallet
@@ -127,21 +137,21 @@ export class WalletService {
         where: { id: wallet.id },
         data: {
           balance: {
-            increment: addMoneyDto.amount
-          }
+            increment: addMoneyDto.amount,
+          },
         },
         include: {
           allTransactions: {
             orderBy: { createdAt: 'desc' },
-            take: 1
-          }
-        }
+            take: 1,
+          },
+        },
       });
 
       return {
         success: true,
         balance: updatedWallet.balance,
-        transaction: transaction
+        transaction: transaction,
       };
     });
 
@@ -156,19 +166,21 @@ export class WalletService {
     }
 
     // Simular validación de la cuenta bancaria
-    await this.validateBankAccount(withdrawDto.bankAccount);
+    this.validateBankAccount(withdrawDto.bankAccount);
 
     // Usar una transacción de base de datos para asegurar consistencia
     const result = await this.prisma.$transaction(async (prisma) => {
       // Primero creamos o buscamos una wallet del sistema para representar el destino externo
-      const systemWallet = await prisma.wallet.findFirst({
-        where: { userId: 'SYSTEM' }
-      }) || await prisma.wallet.create({
-        data: {
-          userId: 'SYSTEM',
-          balance: 0
-        }
-      });
+      const systemWallet =
+        (await prisma.wallet.findFirst({
+          where: { userId: 'SYSTEM' },
+        })) ||
+        (await prisma.wallet.create({
+          data: {
+            userId: 'SYSTEM',
+            balance: 0,
+          },
+        }));
 
       // Crear la transacción
       const transaction = await prisma.transaction.create({
@@ -177,15 +189,15 @@ export class WalletService {
           type: 'OUT',
           description: `Withdrawal to bank account ${withdrawDto.bankAccount}`,
           effectedWallet: {
-            connect: { id: wallet.id }
+            connect: { id: wallet.id },
           },
           senderWallet: {
-            connect: { id: wallet.id }
+            connect: { id: wallet.id },
           },
           receiverWallet: {
-            connect: { id: systemWallet.id }
-          }
-        }
+            connect: { id: systemWallet.id },
+          },
+        },
       });
 
       // Actualizar el balance de la wallet
@@ -193,28 +205,28 @@ export class WalletService {
         where: { id: wallet.id },
         data: {
           balance: {
-            decrement: withdrawDto.amount
-          }
+            decrement: withdrawDto.amount,
+          },
         },
         include: {
           allTransactions: {
             orderBy: { createdAt: 'desc' },
-            take: 1
-          }
-        }
+            take: 1,
+          },
+        },
       });
 
       return {
         success: true,
         balance: updatedWallet.balance,
-        transaction: transaction
+        transaction: transaction,
       };
     });
 
     return result;
   }
 
-  private async validatePaymentMethod(addMoneyDto: AddMoneyDto): Promise<void> {
+  private validatePaymentMethod(addMoneyDto: AddMoneyDto): void {
     if (addMoneyDto.amount <= 0) {
       throw new BadRequestException('Amount must be greater than 0');
     }
@@ -222,7 +234,7 @@ export class WalletService {
     return;
   }
 
-  private async validateBankAccount(bankAccount: string): Promise<void> {
+  private validateBankAccount(bankAccount: string): void {
     if (!bankAccount) {
       throw new BadRequestException('Bank account is required');
     }
@@ -230,4 +242,3 @@ export class WalletService {
     return;
   }
 }
-
