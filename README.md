@@ -237,3 +237,6 @@ Create a `.env` file with:
 DATABASE_URL=postgresql://postgres:postgres@db:5432/walle?schema=public
 JWT_SECRET=your-secret-key
 ```
+
+# esto va antes de hacer docker compose, ahora q metí la imagen de eva-bank
+echo <TU_TOKEN> | docker login ghcr.io -u <tu_usuario_github> --password-stdin
