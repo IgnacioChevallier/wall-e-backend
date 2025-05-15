@@ -37,7 +37,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.WALLE_TOKEN }}
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -62,7 +62,7 @@ jobs:
           tag_name: v${{ steps.package-version.outputs.VERSION }}
           generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.WALLE_TOKEN }}
       
       # Opcional: Deploy a producción (descomenta y configura secretos cuando sea necesario)
       # - name: Deploy to production server
