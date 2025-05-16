@@ -23,8 +23,6 @@ export class TransactionsController {
   @Post('p2p')
   @UseGuards(AuthGuard('jwt'))
   async p2pTransfer(@Request() req, @Body() p2pTransferDto: P2PTransferDto) {
-    console.log('Authenticated user object from req:', req.user);
-
     const senderId = req.user?.id;
     if (!senderId) {
       throw new Error('User not authenticated');

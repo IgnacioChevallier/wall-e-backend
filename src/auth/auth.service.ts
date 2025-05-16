@@ -29,9 +29,11 @@ export class AuthService {
     const existingUserByEmail = await this.usersService
       .findByEmail(email)
       .catch(() => null);
+
     if (existingUserByEmail) {
       throw new ConflictException('Email already exists');
     }
+
     if (alias) {
       const existingUserByAlias = await this.usersService
         .findByAlias(alias)
@@ -70,7 +72,7 @@ export class AuthService {
 
   async login(loginDto: LoginDto): Promise<AuthResponse> {
     const { email, password } = loginDto;
-    // This will still error if findByEmail is not in UsersService
+
     const user = await this.usersService.findByEmail(email);
 
     if (

@@ -51,10 +51,7 @@ export class WalletService {
   }
 
   async getWalletBalance(userId: string): Promise<number> {
-    const wallet = await this.prisma.wallet.findUnique({ where: { userId } });
-    if (!wallet) {
-      throw new NotFoundException('Wallet not found');
-    }
+    const wallet = await this.getWalletByUserId(userId);
     return wallet.balance;
   }
 

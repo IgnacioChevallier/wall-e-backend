@@ -7,15 +7,19 @@ import {
   Delete,
   Request,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
 import { AddMoneyDto } from './dto/add-money.dto';
+import { AuthGuard } from '@nestjs/passport';
 import { WithdrawMoneyDto } from './dto/withdraw-money.dto';
 
 interface RequestWithUser {
   user: {
-    sub: string;
+    id: string;
+    email: string;
+    alias: string;
   };
 }
 
@@ -24,15 +28,16 @@ export class WalletController {
   constructor(private readonly walletService: WalletService) {}
 
   @Get('balance')
+  @UseGuards(AuthGuard('jwt'))
   async getBalance(@Request() req: RequestWithUser) {
     return {
-      balance: await this.walletService.getWalletBalance(req.user.sub),
+      balance: await this.walletService.getWalletBalance(req.user.id),
     };
   }
 
   @Get()
   async getWalletDetails(@Request() req: RequestWithUser) {
-    return this.walletService.getWalletDetails(req.user.sub);
+    return this.walletService.getWalletDetails(req.user.id);
   }
 
   @Get(':id')
