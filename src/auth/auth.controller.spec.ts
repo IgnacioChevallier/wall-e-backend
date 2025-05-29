@@ -3,6 +3,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -13,6 +15,15 @@ describe('AuthController', () => {
     login: jest.fn(),
   };
 
+  const mockConfigService = {
+    get: jest.fn().mockReturnValue('development'),
+  };
+
+  // Mock response object
+  const mockResponse = {
+    cookie: jest.fn().mockReturnThis(),
+  } as unknown as Response;
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -22,6 +33,10 @@ describe('AuthController', () => {
         {
           provide: AuthService,
           useValue: mockAuthService,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();
@@ -40,15 +55,16 @@ describe('AuthController', () => {
         email: 'test@example.com',
         password: 'password123',
       };
-      const mockResult = { access_token: 'test-token' };
+      const mockResult = { accessToken: 'test-token', user: { id: 'user-id', email: 'test@example.com' } };
 
       mockAuthService.register.mockResolvedValue(mockResult);
 
-      const result = await controller.register(registerDto);
+      const result = await controller.register(registerDto, mockResponse);
 
-      expect(result).toEqual(mockResult);
+      expect(result).toEqual({ user: mockResult.user });
       expect(mockAuthService.register).toHaveBeenCalledWith(registerDto);
       expect(mockAuthService.register).toHaveBeenCalledTimes(1);
+      expect(mockResponse.cookie).toHaveBeenCalledWith('access_token', 'test-token', expect.any(Object));
     });
 
     it('should handle errors from authService.register', async () => {
@@ -61,7 +77,7 @@ describe('AuthController', () => {
         new Error('Registration failed'),
       );
 
-      await expect(controller.register(registerDto)).rejects.toThrow(
+      await expect(controller.register(registerDto, mockResponse)).rejects.toThrow(
         'Registration failed',
       );
       expect(mockAuthService.register).toHaveBeenCalledWith(registerDto);
@@ -74,15 +90,16 @@ describe('AuthController', () => {
         email: 'test@example.com',
         password: 'password123',
       };
-      const mockResult = { access_token: 'test-token' };
+      const mockResult = { accessToken: 'test-token', user: { id: 'user-id', email: 'test@example.com' } };
 
       mockAuthService.login.mockResolvedValue(mockResult);
 
-      const result = await controller.login(loginDto);
+      const result = await controller.login(loginDto, mockResponse);
 
-      expect(result).toEqual(mockResult);
+      expect(result).toEqual({ user: mockResult.user });
       expect(mockAuthService.login).toHaveBeenCalledWith(loginDto);
       expect(mockAuthService.login).toHaveBeenCalledTimes(1);
+      expect(mockResponse.cookie).toHaveBeenCalledWith('access_token', 'test-token', expect.any(Object));
     });
 
     it('should handle errors from authService.login', async () => {
@@ -93,7 +110,7 @@ describe('AuthController', () => {
 
       mockAuthService.login.mockRejectedValue(new Error('Login failed'));
 
-      await expect(controller.login(loginDto)).rejects.toThrow('Login failed');
+      await expect(controller.login(loginDto, mockResponse)).rejects.toThrow('Login failed');
       expect(mockAuthService.login).toHaveBeenCalledWith(loginDto);
     });
   });
