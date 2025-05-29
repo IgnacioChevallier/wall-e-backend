@@ -4,6 +4,15 @@ import { WalletService } from './wallet.service';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
 import { NotFoundException } from '@nestjs/common';
 
+// Import the RequestWithUser interface or define it locally
+interface RequestWithUser {
+  user: {
+    id: string;
+    email: string;
+    alias: string;
+  };
+}
+
 describe('WalletController', () => {
   let controller: WalletController;
   let service: WalletService;
@@ -55,7 +64,13 @@ describe('WalletController', () => {
 
   describe('getBalance', () => {
     it('should return the wallet balance for authenticated user', async () => {
-      const mockReq = { user: { sub: 'user-id' } };
+      const mockReq: RequestWithUser = { 
+        user: { 
+          id: 'user-id', 
+          email: 'test@example.com', 
+          alias: 'testuser' 
+        } 
+      };
       mockWalletService.getWalletBalance.mockResolvedValue(100);
 
       const result = await controller.getBalance(mockReq);
@@ -67,7 +82,13 @@ describe('WalletController', () => {
     });
 
     it('should handle errors from walletService.getWalletBalance', async () => {
-      const mockReq = { user: { sub: 'user-id' } };
+      const mockReq: RequestWithUser = { 
+        user: { 
+          id: 'user-id', 
+          email: 'test@example.com', 
+          alias: 'testuser' 
+        } 
+      };
       mockWalletService.getWalletBalance.mockRejectedValue(
         new NotFoundException('Wallet not found'),
       );
@@ -83,7 +104,13 @@ describe('WalletController', () => {
 
   describe('getWalletDetails', () => {
     it('should return wallet details for authenticated user', async () => {
-      const mockReq = { user: { sub: 'user-id' } };
+      const mockReq: RequestWithUser = { 
+        user: { 
+          id: 'user-id', 
+          email: 'test@example.com', 
+          alias: 'testuser' 
+        } 
+      };
       mockWalletService.getWalletDetails.mockResolvedValue(mockWallet);
 
       const result = await controller.getWalletDetails(mockReq);
@@ -95,7 +122,13 @@ describe('WalletController', () => {
     });
 
     it('should handle errors from walletService.getWalletDetails', async () => {
-      const mockReq = { user: { sub: 'user-id' } };
+      const mockReq: RequestWithUser = { 
+        user: { 
+          id: 'user-id', 
+          email: 'test@example.com', 
+          alias: 'testuser' 
+        } 
+      };
       mockWalletService.getWalletDetails.mockRejectedValue(
         new NotFoundException('Wallet not found'),
       );
