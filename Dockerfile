@@ -1,48 +1,49 @@
-# Etapa de desarrollo
+# Development stage
 FROM node:20-alpine AS development
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Instalar dependencias necesarias
-RUN apk add --no-cache libc6-compat openssl python3 make g++ bash
-
-# Copiar archivos de configuración
-COPY package.json package-lock.json ./
-
-# Instalar dependencias
+# Copy config files and install dependencies
+COPY package*.json ./
 RUN npm ci
 
-# Copiar el resto de la app
+# Copy source code
 COPY . .
 
-# Generar el cliente de Prisma (necesario antes del build)
+# Generate Prisma client
 RUN npx prisma generate
 
-# Compilar la aplicación
+# Build the app
 RUN npm run build
 
-# Etapa de producción
+# Build bcrypt from source
+RUN apk --no-cache add --virtual build-deps build-base python3 make \
+    && npm install bcrypt \
+    && npm rebuild bcrypt --build-from-source \
+    && apk del build-deps
+
+# Production stage
 FROM node:20-alpine AS production
 
-# Instalar dependencias necesarias para producción
+# Install system dependencies
 RUN apk add --no-cache libc6-compat openssl
 
-WORKDIR /app
+# Set working directory
+WORKDIR /usr/src/app
 
-# Copiar solo los archivos necesarios para producción
+# Copy only what's needed
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY --from=development /app/dist ./dist
-COPY --from=development /app/node_modules ./node_modules
-COPY --from=development /app/prisma ./prisma
-COPY --from=development /app/generated ./generated
+# paths
+COPY --from=development /usr/src/app/dist ./dist
+COPY --from=development /usr/src/app/node_modules ./node_modules
+COPY --from=development /usr/src/app/prisma ./prisma
+COPY --from=development /usr/src/app/generated ./generated
 
-# Asegurar que Prisma funcione en producción
+# Generate Prisma client (optional in prod if already built in dev)
 RUN npx prisma generate
 
-# Exponer el puerto
 EXPOSE 3000
 
-# Comando de arranque
 CMD ["node", "dist/main"]
