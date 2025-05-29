@@ -25,13 +25,12 @@ RUN apk add --no-cache libc6-compat openssl
 # Set working directory
 WORKDIR /usr/src/app
 
-# Copy only what's needed
+# Copy package files and install only production dependencies
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-# paths
+# Copy only the built application and necessary files
 COPY --from=development /usr/src/app/dist ./dist
-COPY --from=development /usr/src/app/node_modules ./node_modules
 COPY --from=development /usr/src/app/prisma ./prisma
 COPY --from=development /usr/src/app/generated ./generated
 
