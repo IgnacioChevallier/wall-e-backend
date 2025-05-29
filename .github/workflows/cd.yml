@@ -63,22 +63,4 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.WALLE_TOKEN }}
-      
-      # Opcional: Deploy a producción (descomenta y configura secretos cuando sea necesario)
-      # - name: Deploy to production server
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ secrets.DEPLOY_HOST }}
-      #     username: ${{ secrets.DEPLOY_USER }}
-      #     key: ${{ secrets.DEPLOY_SSH_KEY }}
-      #     script: |
-      #       cd /path/to/deployment
-      #       echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
-      #       echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
-      #       echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
-      #       echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
-      #       echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-      #       echo "NODE_ENV=production" >> .env
-      #       
-      #       docker-compose -f docker-compose.prod.yml pull
-      #       docker-compose -f docker-compose.prod.yml up -d 
+          

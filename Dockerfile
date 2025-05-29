@@ -16,12 +16,6 @@ RUN npx prisma generate
 # Build the app
 RUN npm run build
 
-# Build bcrypt from source
-RUN apk --no-cache add --virtual build-deps build-base python3 make \
-    && npm install bcrypt \
-    && npm rebuild bcrypt --build-from-source \
-    && apk del build-deps
-
 # Production stage
 FROM node:20-alpine AS production
 
