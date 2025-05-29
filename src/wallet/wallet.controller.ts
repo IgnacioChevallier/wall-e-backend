@@ -70,6 +70,7 @@ export class WalletController {
   }
 
   @Post('topup/debin')
+  @UseGuards(AuthGuard('jwt'))
   async requestDebin(@Request() req, @Body() data: { amount: number }) {
     return this.walletService.requestDebin(req.user.id, data.amount);
   }

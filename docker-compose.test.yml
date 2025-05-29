@@ -1,0 +1,25 @@
+services:
+  # Test database - separate from dev
+  test-db:
+    image: postgres:15-alpine
+    container_name: walle-test-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_DB: walle_test
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  # External bank service for testing
+  eva-bank-test:
+    build: ../eva-bank
+    container_name: eva-bank-test
+    ports:
+      - "3002:3001"
+    environment:
+      - PORT=3001
+
+volumes:
+  test_data: 

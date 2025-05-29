@@ -23,6 +23,11 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  // Method for testing purposes
+  async generateJwt(payload: { sub: string; email: string }): Promise<string> {
+    return this.jwtService.sign({ email: payload.email, userId: payload.sub });
+  }
+
   async register(createUserDto: CreateUserDto): Promise<AuthResponse> {
     const { email, password, alias } = createUserDto;
 
