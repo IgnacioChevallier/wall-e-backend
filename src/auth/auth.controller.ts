@@ -26,17 +26,17 @@ export class AuthController {
   async register(
     @Body() createUserDto: CreateUserDto,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<Omit<AuthResponse, 'accessToken'>> {
-    const { accessToken, user } =
-      await this.authService.register(createUserDto);
+  ): Promise<{success: boolean}> {
+    const { accessToken } = await this.authService.register(createUserDto);
 
     response.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
       sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
-
-    return { user };
+    
+    return { success: true };
   }
 
   @Post('login')
@@ -45,15 +45,24 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<Omit<AuthResponse, 'accessToken'>> {
-    const { accessToken, user } = await this.authService.login(loginDto);
+  ): Promise<{success: boolean}> {
+    const { accessToken } = await this.authService.login(loginDto);
 
     response.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
       sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
+    
+    return { success: true };
+  }
 
-    return { user };
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<{ success: boolean }> {
+    return this.authService.logout(response);
   }
 }

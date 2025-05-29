@@ -3,21 +3,23 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '../../generated/prisma';
 import { CreateUserDto } from 'src/auth/dto/create-user.dto';
-import * as bcrypt from 'bcrypt';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private userRepository: UserRepository
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { email, password, alias: initialAlias } = createUserDto;
     const alias = initialAlias || generateAlias(email);
 
-    const hashedPassword = await bcrypt.hash(password, 10);
     return this.prisma.user.create({
       data: {
         email,
-        password: hashedPassword,
+        password,
         alias,
         wallet: { create: { balance: 0 } },
       },
@@ -56,10 +58,21 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { alias } });
   }
 
+  async findAllAliases(): Promise<string[]> {
+    return this.userRepository.findAllAliases();
+  }
+
   async update(id: string, dto: UpdateUserDto) {
     return this.prisma.user.update({
       where: { id },
       data: { ...dto },
+    });
+  }
+
+  async updatePasswordHash(id: string, passwordHash: string): Promise<User> {
+    return this.prisma.user.update({
+      where: { id },
+      data: { password: passwordHash },
     });
   }
 

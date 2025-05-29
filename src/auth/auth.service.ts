@@ -3,17 +3,17 @@ import {
   ConflictException,
   UnauthorizedException,
   InternalServerErrorException,
+  HttpException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../../generated/prisma';
 import { LoginDto } from './dto/login.dto';
+import { Response } from 'express';
 
 export interface AuthResponse {
   accessToken: string;
-  user: Omit<User, 'password'>;
 }
 
 @Injectable()
@@ -26,38 +26,39 @@ export class AuthService {
   async register(createUserDto: CreateUserDto): Promise<AuthResponse> {
     const { email, password, alias } = createUserDto;
 
-    const existingUserByEmail = await this.usersService
-      .findByEmail(email)
-      .catch(() => null);
-
-    if (existingUserByEmail) {
-      throw new ConflictException('Email already exists');
-    }
-
-    if (alias) {
-      const existingUserByAlias = await this.usersService
-        .findByAlias(alias)
-        .catch(() => null);
-      if (existingUserByAlias) {
-        throw new ConflictException('Alias already exists');
-      }
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     try {
+      const existingUserByEmail = await this.usersService
+        .findByEmail(email)
+        .catch(() => null);
+
+      if (existingUserByEmail) {
+        throw new ConflictException('Email already exists');
+      }
+
+      if (alias) {
+        const existingUserByAlias = await this.usersService
+          .findByAlias(alias)
+          .catch(() => null);
+        if (existingUserByAlias) {
+          throw new ConflictException('Alias already exists');
+        }
+      }
+
       const user: User = await this.usersService.create({
         email,
-        password: hashedPassword,
+        password,
         alias,
       });
 
-      const { password: _, ...userWithoutPassword } = user;
       const payload = { email: user.email, userId: user.id };
       const accessToken = this.jwtService.sign(payload);
 
-      return { accessToken, user: userWithoutPassword };
+      return { accessToken };
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      
       if (error.code === 'P2002') {
         throw new ConflictException(
           'User with this email or alias already exists (from database constraint).',
@@ -73,18 +74,33 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<AuthResponse> {
     const { email, password } = loginDto;
 
-    const user = await this.usersService.findByEmail(email);
+    try {
+      const user = await this.usersService.findByEmail(email);
 
-    if (
-      user &&
-      user.password &&
-      (await bcrypt.compare(password, user.password))
-    ) {
-      const { password: _, ...userWithoutPassword } = user;
-      const payload = { email: user.email, userId: user.id };
-      const accessToken = this.jwtService.sign(payload);
-      return { accessToken, user: userWithoutPassword };
+      if (!user) {
+        throw new UnauthorizedException('Please check your login credentials');
+      }
+      
+      const isPasswordValid = user.password === password;
+      
+      if (isPasswordValid) {
+        const payload = { email: user.email, userId: user.id };
+        const accessToken = this.jwtService.sign(payload);
+        return { accessToken };
+      }
+      
+      throw new UnauthorizedException('Please check your login credentials');
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      console.error('Error during login:', error);
+      throw new InternalServerErrorException('An unexpected error occurred during login');
     }
-    throw new UnauthorizedException('Please check your login credentials');
+  }
+
+  async logout(response: Response): Promise<{ success: boolean }> {
+    response.clearCookie('access_token');
+    return { success: true };
   }
 }

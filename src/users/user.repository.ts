@@ -34,4 +34,12 @@ export class UserRepository {
       include: { wallet: true },
     });
   }
+
+  findAllAliases(): Promise<string[]> {
+    return this.prisma.user.findMany({
+      select: {
+        alias: true,
+      },
+    }).then(users => users.map(user => user.alias));
+  }
 }

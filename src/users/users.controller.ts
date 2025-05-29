@@ -11,6 +11,11 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('aliases')
+  findAllAliases() {
+    return this.usersService.findAllAliases();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
