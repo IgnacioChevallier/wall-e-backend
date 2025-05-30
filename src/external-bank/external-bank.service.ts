@@ -16,7 +16,7 @@ export class ExternalBankService {
   constructor(private readonly configService: ConfigService) {
     this.bankApiUrl =
       this.configService.get<string>('BANK_API_URL') ||
-      'http://bank-service:3001';
+      'http://eva-bank:3001';
   }
 
   async Transfer(data: BankTransferRequest): Promise<BankTransferResponse> {

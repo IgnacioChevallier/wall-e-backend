@@ -7,9 +7,10 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET}
-      BANK_SERVICE_URL: http://eva-bank:3001 # hardcodeado por ahora, podría ir en el .env
+      BANK_API_URL: ${BANK_SERVICE_URL}
     depends_on:
       - db
+      - eva-bank
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules

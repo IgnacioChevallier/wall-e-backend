@@ -113,14 +113,25 @@ export class WalletService {
 
     // Usar una transacción de base de datos para asegurar consistencia
     const result = await this.prisma.$transaction(async (prisma) => {
-      // Primero creamos o buscamos una wallet del sistema para representar el origen externo
+      // Primero creamos o buscamos un usuario del sistema
+      const systemUser = await prisma.user.upsert({
+        where: { email: 'system@walle.internal' },
+        update: {},
+        create: {
+          email: 'system@walle.internal',
+          alias: 'SYSTEM',
+          password: 'N/A', // Sistema no necesita password real
+        },
+      });
+
+      // Luego creamos o buscamos una wallet del sistema
       const systemWallet =
         (await prisma.wallet.findFirst({
-          where: { userId: 'SYSTEM' },
+          where: { userId: systemUser.id },
         })) ||
         (await prisma.wallet.create({
           data: {
-            userId: 'SYSTEM',
+            userId: systemUser.id,
             balance: 0,
           },
         }));
@@ -184,27 +195,16 @@ export class WalletService {
 
     // Si el DEBIN fue aprobado, proceder con la transacción
     const result = await this.prisma.$transaction(async (prisma) => {
-      const systemWallet =
-        (await prisma.wallet.findFirst({
-          where: { userId: 'SYSTEM' },
-        })) ||
-        (await prisma.wallet.create({
-          data: {
-            userId: 'SYSTEM',
-            balance: 0,
-          },
-        }));
-
       const transaction = await prisma.transaction.create({
         data: {
           amount: amount,
           type: 'IN',
-          description: `DEBIN transfer approved`,
+          description: `DEBIN transfer from external bank account`,
           effectedWallet: {
             connect: { id: wallet.id },
           },
           senderWallet: {
-            connect: { id: systemWallet.id },
+            connect: { id: wallet.id },
           },
           receiverWallet: {
             connect: { id: wallet.id },
