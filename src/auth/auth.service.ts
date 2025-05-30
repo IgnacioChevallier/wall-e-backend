@@ -24,7 +24,7 @@ export class AuthService {
   ) {}
 
   // Method for testing purposes
-  async generateJwt(payload: { sub: string; email: string }): Promise<string> {
+  generateJwt(payload: { sub: string; email: string }): string {
     return this.jwtService.sign({ email: payload.email, userId: payload.sub });
   }
 
@@ -63,7 +63,7 @@ export class AuthService {
       if (error instanceof HttpException) {
         throw error;
       }
-      
+
       if (error.code === 'P2002') {
         throw new ConflictException(
           'User with this email or alias already exists (from database constraint).',
@@ -85,26 +85,28 @@ export class AuthService {
       if (!user) {
         throw new UnauthorizedException('Please check your login credentials');
       }
-      
+
       const isPasswordValid = user.password === password;
-      
+
       if (isPasswordValid) {
         const payload = { email: user.email, userId: user.id };
         const accessToken = this.jwtService.sign(payload);
         return { accessToken };
       }
-      
+
       throw new UnauthorizedException('Please check your login credentials');
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
       console.error('Error during login:', error);
-      throw new InternalServerErrorException('An unexpected error occurred during login');
+      throw new InternalServerErrorException(
+        'An unexpected error occurred during login',
+      );
     }
   }
 
-  async logout(response: Response): Promise<{ success: boolean }> {
+  logout(response: Response): { success: boolean } {
     response.clearCookie('access_token');
     return { success: true };
   }

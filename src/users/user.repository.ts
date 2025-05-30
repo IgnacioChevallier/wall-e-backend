@@ -36,10 +36,12 @@ export class UserRepository {
   }
 
   findAllAliases(): Promise<string[]> {
-    return this.prisma.user.findMany({
-      select: {
-        alias: true,
-      },
-    }).then(users => users.map(user => user.alias));
+    return this.prisma.user
+      .findMany({
+        select: {
+          alias: true,
+        },
+      })
+      .then((users) => users.map((user) => user.alias));
   }
 }

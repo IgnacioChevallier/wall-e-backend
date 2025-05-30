@@ -55,7 +55,10 @@ describe('AuthController', () => {
         email: 'test@example.com',
         password: 'password123',
       };
-      const mockResult = { accessToken: 'test-token', user: { id: 'user-id', email: 'test@example.com' } };
+      const mockResult = {
+        accessToken: 'test-token',
+        user: { id: 'user-id', email: 'test@example.com' },
+      };
 
       mockAuthService.register.mockResolvedValue(mockResult);
 
@@ -64,7 +67,11 @@ describe('AuthController', () => {
       expect(result).toEqual({ user: mockResult.user });
       expect(mockAuthService.register).toHaveBeenCalledWith(registerDto);
       expect(mockAuthService.register).toHaveBeenCalledTimes(1);
-      expect(mockResponse.cookie).toHaveBeenCalledWith('access_token', 'test-token', expect.any(Object));
+      expect(mockResponse.cookie).toHaveBeenCalledWith(
+        'access_token',
+        'test-token',
+        expect.any(Object),
+      );
     });
 
     it('should handle errors from authService.register', async () => {
@@ -77,9 +84,9 @@ describe('AuthController', () => {
         new Error('Registration failed'),
       );
 
-      await expect(controller.register(registerDto, mockResponse)).rejects.toThrow(
-        'Registration failed',
-      );
+      await expect(
+        controller.register(registerDto, mockResponse),
+      ).rejects.toThrow('Registration failed');
       expect(mockAuthService.register).toHaveBeenCalledWith(registerDto);
     });
   });
@@ -90,7 +97,10 @@ describe('AuthController', () => {
         email: 'test@example.com',
         password: 'password123',
       };
-      const mockResult = { accessToken: 'test-token', user: { id: 'user-id', email: 'test@example.com' } };
+      const mockResult = {
+        accessToken: 'test-token',
+        user: { id: 'user-id', email: 'test@example.com' },
+      };
 
       mockAuthService.login.mockResolvedValue(mockResult);
 
@@ -99,7 +109,11 @@ describe('AuthController', () => {
       expect(result).toEqual({ user: mockResult.user });
       expect(mockAuthService.login).toHaveBeenCalledWith(loginDto);
       expect(mockAuthService.login).toHaveBeenCalledTimes(1);
-      expect(mockResponse.cookie).toHaveBeenCalledWith('access_token', 'test-token', expect.any(Object));
+      expect(mockResponse.cookie).toHaveBeenCalledWith(
+        'access_token',
+        'test-token',
+        expect.any(Object),
+      );
     });
 
     it('should handle errors from authService.login', async () => {
@@ -110,7 +124,9 @@ describe('AuthController', () => {
 
       mockAuthService.login.mockRejectedValue(new Error('Login failed'));
 
-      await expect(controller.login(loginDto, mockResponse)).rejects.toThrow('Login failed');
+      await expect(controller.login(loginDto, mockResponse)).rejects.toThrow(
+        'Login failed',
+      );
       expect(mockAuthService.login).toHaveBeenCalledWith(loginDto);
     });
   });

@@ -22,7 +22,7 @@ describe('External Bank Integration (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    
+
     // Configure the app like in main.ts
     app.use(cookieParser());
     app.useGlobalPipes(
@@ -82,8 +82,11 @@ describe('External Bank Integration (e2e)', () => {
 
     // Extract the cookie from the response
     const setCookieHeader = loginResponse.headers['set-cookie'];
-    const cookies = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
-    userCookie = cookies.find(cookie => cookie?.startsWith('access_token=')) || '';
+    const cookies = Array.isArray(setCookieHeader)
+      ? setCookieHeader
+      : [setCookieHeader];
+    userCookie =
+      cookies.find((cookie) => cookie?.startsWith('access_token=')) || '';
   });
 
   afterAll(async () => {
@@ -99,7 +102,7 @@ describe('External Bank Integration (e2e)', () => {
       const transferData = {
         amount: 100,
         toWalletId: 'external-wallet-123',
-        source: 'TRANSFER'
+        source: 'TRANSFER',
       };
 
       const response = await request(app.getHttpServer())
@@ -130,7 +133,7 @@ describe('External Bank Integration (e2e)', () => {
     it('should successfully call external bank debin endpoint', async () => {
       const debinData = {
         amount: 200,
-        toWalletId: 'external-wallet-debin-123'
+        toWalletId: 'external-wallet-debin-123',
       };
 
       const response = await request(app.getHttpServer())
@@ -160,7 +163,7 @@ describe('External Bank Integration (e2e)', () => {
   describe('Wallet Integration Tests (with Auth)', () => {
     it('should successfully process DEBIN request through wallet endpoint', async () => {
       const debinData = {
-        amount: 200
+        amount: 200,
       };
 
       const response = await request(app.getHttpServer())
@@ -188,12 +191,12 @@ describe('External Bank Integration (e2e)', () => {
         },
       });
       expect(transaction).toBeTruthy();
-      expect(transaction?.description).toContain('DEBIN'); 
+      expect(transaction?.description).toContain('DEBIN');
     });
 
     it('should fail DEBIN request without authentication', async () => {
       const debinData = {
-        amount: 100
+        amount: 100,
       };
 
       await request(app.getHttpServer())
@@ -207,11 +210,7 @@ describe('External Bank Integration (e2e)', () => {
         where: { id: testWalletId },
       });
 
-      const debinRequests = [
-        { amount: 50 },
-        { amount: 75 },
-        { amount: 25 }
-      ];
+      const debinRequests = [{ amount: 50 }, { amount: 75 }, { amount: 25 }];
 
       for (const debinData of debinRequests) {
         const response = await request(app.getHttpServer())
@@ -228,7 +227,9 @@ describe('External Bank Integration (e2e)', () => {
         where: { id: testWalletId },
       });
       const expectedIncrease = 50 + 75 + 25; // 150
-      expect(finalWallet?.balance).toBe((initialBalance?.balance || 0) + expectedIncrease);
+      expect(finalWallet?.balance).toBe(
+        (initialBalance?.balance || 0) + expectedIncrease,
+      );
 
       // Verify all transactions were recorded
       const transactions = await prisma.transaction.findMany({
@@ -253,4 +254,4 @@ describe('External Bank Integration (e2e)', () => {
       });
     });
   });
-}); 
+});
