@@ -13,6 +13,9 @@ const mockPrismaService = {
     create: jest.fn(),
     update: jest.fn(),
   },
+  user: {
+    upsert: jest.fn(),
+  },
   transaction: {
     create: jest.fn(),
   },
@@ -86,6 +89,14 @@ describe('WalletService', () => {
         success: true,
         transactionId: 'test-tx-id',
       });
+
+      // Mock system user creation
+      const mockSystemUser = {
+        id: 'system-user-id',
+        email: 'system@walle.internal',
+        alias: 'SYSTEM',
+      };
+      mockPrismaService.user.upsert.mockResolvedValue(mockSystemUser);
 
       // Mock wallet lookup
       mockPrismaService.wallet.findUnique.mockResolvedValue(mockWallet);
@@ -171,6 +182,14 @@ describe('WalletService', () => {
         approved: true,
         debinId: 'test-debin-id',
       });
+
+      // Mock system user creation
+      const mockSystemUser = {
+        id: 'system-user-id',
+        email: 'system@walle.internal',
+        alias: 'SYSTEM',
+      };
+      mockPrismaService.user.upsert.mockResolvedValue(mockSystemUser);
 
       // Mock database operations
       mockPrismaService.wallet.findUnique.mockResolvedValue(mockWallet);
