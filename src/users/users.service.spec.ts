@@ -1,26 +1,35 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserRepository } from './user.repository';
 import { NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 describe('UsersService', () => {
   let service: UsersService;
   let prismaService: PrismaService;
+  let userRepository: UserRepository;
 
   const mockPrismaService = {
     user: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
     },
+  };
+
+  const mockUserRepository = {
+    findAllAliases: jest.fn(),
   };
 
   const mockUser = {
     id: 'user-id',
     email: 'test@example.com',
     password: 'hashed-password',
+    alias: 'testuser_123',
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -35,15 +44,77 @@ describe('UsersService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: UserRepository,
+          useValue: mockUserRepository,
+        },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
     prismaService = module.get<PrismaService>(PrismaService);
+    userRepository = module.get<UserRepository>(UserRepository);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('create', () => {
+    it('should create a new user with generated alias', async () => {
+      const createUserDto = {
+        email: 'test@example.com',
+        password: 'password123',
+      };
+      const createdUser = {
+        ...mockUser,
+        email: createUserDto.email,
+        password: createUserDto.password,
+        alias: 'test_abc', // Generated alias
+      };
+
+      mockPrismaService.user.create.mockResolvedValue(createdUser);
+
+      const result = await service.create(createUserDto);
+
+      expect(result).toEqual(createdUser);
+      expect(mockPrismaService.user.create).toHaveBeenCalledWith({
+        data: {
+          email: createUserDto.email,
+          password: createUserDto.password,
+          alias: expect.stringMatching(/^test_[a-z0-9]{3}$/), // Generated alias pattern
+          wallet: { create: { balance: 0 } },
+        },
+      });
+    });
+
+    it('should create a new user with provided alias', async () => {
+      const createUserDto = {
+        email: 'test@example.com',
+        password: 'password123',
+        alias: 'custom_alias',
+      };
+      const createdUser = {
+        ...mockUser,
+        email: createUserDto.email,
+        password: createUserDto.password,
+        alias: createUserDto.alias,
+      };
+
+      mockPrismaService.user.create.mockResolvedValue(createdUser);
+
+      const result = await service.create(createUserDto);
+
+      expect(result).toEqual(createdUser);
+      expect(mockPrismaService.user.create).toHaveBeenCalledWith({
+        data: {
+          email: createUserDto.email,
+          password: createUserDto.password,
+          alias: createUserDto.alias,
+          wallet: { create: { balance: 0 } },
+        },
+      });
+    });
   });
 
   describe('findAll', () => {
@@ -117,17 +188,81 @@ describe('UsersService', () => {
     });
   });
 
+  describe('findByEmail', () => {
+    it('should return a user when found by email', async () => {
+      const email = 'test@example.com';
+      mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
+
+      const result = await service.findByEmail(email);
+
+      expect(result).toEqual(mockUser);
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email },
+      });
+    });
+
+    it('should return null when user not found by email', async () => {
+      const email = 'nonexistent@example.com';
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+
+      const result = await service.findByEmail(email);
+
+      expect(result).toBeNull();
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email },
+      });
+    });
+  });
+
+  describe('findByAlias', () => {
+    it('should return a user when found by alias', async () => {
+      const alias = 'testuser_123';
+      mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
+
+      const result = await service.findByAlias(alias);
+
+      expect(result).toEqual(mockUser);
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { alias },
+      });
+    });
+
+    it('should return null when user not found by alias', async () => {
+      const alias = 'nonexistent_alias';
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+
+      const result = await service.findByAlias(alias);
+
+      expect(result).toBeNull();
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { alias },
+      });
+    });
+  });
+
+  describe('findAllAliases', () => {
+    it('should return all aliases from repository', async () => {
+      const mockAliases = ['user1_123', 'user2_456', 'user3_789'];
+      mockUserRepository.findAllAliases.mockResolvedValue(mockAliases);
+
+      const result = await service.findAllAliases();
+
+      expect(result).toEqual(mockAliases);
+      expect(mockUserRepository.findAllAliases).toHaveBeenCalled();
+    });
+  });
+
   describe('update', () => {
     it('should update and return a user', async () => {
       const userId = 'user-id';
       const updateDto: UpdateUserDto = {
         email: 'updated@example.com',
-        password: 'newPassword12345',
+        password: 'newPassword123',
       };
       const updatedUser = {
         ...mockUser,
         email: updateDto.email,
-        password: 'new-hashed-password',
+        password: updateDto.password,
         updatedAt: new Date(),
       };
 
@@ -146,7 +281,7 @@ describe('UsersService', () => {
       const userId = 'non-existent-id';
       const updateDto: UpdateUserDto = {
         email: 'updated@example.com',
-        password: 'newPassword12345',
+        password: 'newPassword123',
       };
 
       mockPrismaService.user.update.mockRejectedValue(

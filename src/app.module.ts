@@ -8,6 +8,7 @@ import { WalletModule } from './wallet/wallet.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
+import { ExternalBankModule } from './external-bank/external-bank.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ConfigModule } from '@nestjs/config';
     WalletModule,
     TransactionsModule,
     UsersModule,
+    ExternalBankModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

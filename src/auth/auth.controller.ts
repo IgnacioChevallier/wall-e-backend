@@ -26,7 +26,7 @@ export class AuthController {
   async register(
     @Body() createUserDto: CreateUserDto,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<{success: boolean}> {
+  ): Promise<{ success: boolean }> {
     const { accessToken } = await this.authService.register(createUserDto);
 
     response.cookie('access_token', accessToken, {
@@ -35,7 +35,7 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
-    
+
     return { success: true };
   }
 
@@ -45,7 +45,7 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<{success: boolean}> {
+  ): Promise<{ success: boolean }> {
     const { accessToken } = await this.authService.login(loginDto);
 
     response.cookie('access_token', accessToken, {
@@ -54,15 +54,13 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
-    
+
     return { success: true };
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<{ success: boolean }> {
+  logout(@Res({ passthrough: true }) response: Response): { success: boolean } {
     return this.authService.logout(response);
   }
 }

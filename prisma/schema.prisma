@@ -64,4 +64,6 @@ model Transaction {
 enum TransactionType {
   IN
   OUT
+  TRANSFER
+  DEBIN
 }

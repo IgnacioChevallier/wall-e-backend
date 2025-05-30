@@ -9,7 +9,7 @@ import { UserRepository } from './user.repository';
 export class UsersService {
   constructor(
     private prisma: PrismaService,
-    private userRepository: UserRepository
+    private userRepository: UserRepository,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {

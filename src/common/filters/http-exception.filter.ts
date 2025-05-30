@@ -17,12 +17,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // Format the response to match frontend expectations
     const errorResponse = {
       success: false,
-      message: typeof exceptionResponse === 'string' 
-        ? exceptionResponse 
-        : exceptionResponse.message || 'An error occurred',
+      message:
+        typeof exceptionResponse === 'string'
+          ? exceptionResponse
+          : exceptionResponse.message || 'An error occurred',
       statusCode: status,
     };
 
     response.status(status).json(errorResponse);
   }
-} 
+}

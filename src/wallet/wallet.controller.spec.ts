@@ -64,12 +64,12 @@ describe('WalletController', () => {
 
   describe('getBalance', () => {
     it('should return the wallet balance for authenticated user', async () => {
-      const mockReq: RequestWithUser = { 
-        user: { 
-          id: 'user-id', 
-          email: 'test@example.com', 
-          alias: 'testuser' 
-        } 
+      const mockReq: RequestWithUser = {
+        user: {
+          id: 'user-id',
+          email: 'test@example.com',
+          alias: 'testuser',
+        },
       };
       mockWalletService.getWalletBalance.mockResolvedValue(100);
 
@@ -82,12 +82,12 @@ describe('WalletController', () => {
     });
 
     it('should handle errors from walletService.getWalletBalance', async () => {
-      const mockReq: RequestWithUser = { 
-        user: { 
-          id: 'user-id', 
-          email: 'test@example.com', 
-          alias: 'testuser' 
-        } 
+      const mockReq: RequestWithUser = {
+        user: {
+          id: 'user-id',
+          email: 'test@example.com',
+          alias: 'testuser',
+        },
       };
       mockWalletService.getWalletBalance.mockRejectedValue(
         new NotFoundException('Wallet not found'),
@@ -104,12 +104,12 @@ describe('WalletController', () => {
 
   describe('getWalletDetails', () => {
     it('should return wallet details for authenticated user', async () => {
-      const mockReq: RequestWithUser = { 
-        user: { 
-          id: 'user-id', 
-          email: 'test@example.com', 
-          alias: 'testuser' 
-        } 
+      const mockReq: RequestWithUser = {
+        user: {
+          id: 'user-id',
+          email: 'test@example.com',
+          alias: 'testuser',
+        },
       };
       mockWalletService.getWalletDetails.mockResolvedValue(mockWallet);
 
@@ -122,12 +122,12 @@ describe('WalletController', () => {
     });
 
     it('should handle errors from walletService.getWalletDetails', async () => {
-      const mockReq: RequestWithUser = { 
-        user: { 
-          id: 'user-id', 
-          email: 'test@example.com', 
-          alias: 'testuser' 
-        } 
+      const mockReq: RequestWithUser = {
+        user: {
+          id: 'user-id',
+          email: 'test@example.com',
+          alias: 'testuser',
+        },
       };
       mockWalletService.getWalletDetails.mockRejectedValue(
         new NotFoundException('Wallet not found'),
