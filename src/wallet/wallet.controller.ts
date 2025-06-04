@@ -36,6 +36,7 @@ export class WalletController {
   }
 
   @Get()
+  @UseGuards(AuthGuard('jwt'))
   async getWalletDetails(@Request() req: RequestWithUser) {
     return this.walletService.getWalletDetails(req.user.id);
   }
