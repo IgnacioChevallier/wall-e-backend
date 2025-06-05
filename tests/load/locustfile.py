@@ -41,33 +41,31 @@ class WalletUser(HttpUser):
         self.user_email = fake.email()
         password = "TestPassword123!"
         
-        response = self.client.post("/auth/register", json={
+        with self.client.post("/auth/register", json={
             "email": self.user_email,
             "password": password
-        }, catch_response=True)
-        
-        if response.status_code == 201:
-            response.success()
-        else:
-            response.failure(f"Registration failed: {response.text}")
+        }, catch_response=True) as response:
+            if response.status_code == 201:
+                response.success()
+            else:
+                response.failure(f"Registration failed: {response.text}")
             
     def login_user(self):
         """Login with the registered user"""
-        response = self.client.post("/auth/login", json={
+        with self.client.post("/auth/login", json={
             "email": self.user_email,
             "password": "TestPassword123!"
-        }, catch_response=True)
-        
-        if response.status_code == 200:
-            # Extract auth token from cookies
-            cookies = response.cookies
-            if 'access_token' in cookies:
-                self.auth_token = cookies['access_token']
-                response.success()
+        }, catch_response=True) as response:
+            if response.status_code == 200:
+                # Extract auth token from cookies
+                cookies = response.cookies
+                if 'access_token' in cookies:
+                    self.auth_token = cookies['access_token']
+                    response.success()
+                else:
+                    response.failure("No auth token in response")
             else:
-                response.failure("No auth token in response")
-        else:
-            response.failure(f"Login failed: {response.text}")
+                response.failure(f"Login failed: {response.text}")
     
     def get_headers(self):
         """Get headers with authentication"""
@@ -78,7 +76,7 @@ class WalletUser(HttpUser):
     
     def add_money_to_wallet(self, amount=100):
         """Add money to wallet via manual topup"""
-        response = self.client.post("/wallet/topup/manual", 
+        with self.client.post("/wallet/topup/manual", 
             json={
                 "amount": amount,
                 "method": "BANK_ACCOUNT",
@@ -86,27 +84,25 @@ class WalletUser(HttpUser):
             },
             headers=self.get_headers(),
             catch_response=True
-        )
-        
-        if response.status_code == 201:
-            self.wallet_balance += amount
-            response.success()
-        else:
-            response.failure(f"Add money failed: {response.text}")
+        ) as response:
+            if response.status_code == 201:
+                self.wallet_balance += amount
+                response.success()
+            else:
+                response.failure(f"Add money failed: {response.text}")
     
     def get_balance(self):
         """Get current wallet balance"""
-        response = self.client.get("/wallet/balance",
+        with self.client.get("/wallet/balance",
             headers=self.get_headers(),
             catch_response=True
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            self.wallet_balance = data.get('balance', 0)
-            response.success()
-        else:
-            response.failure(f"Get balance failed: {response.text}")
+        ) as response:
+            if response.status_code == 200:
+                data = response.json()
+                self.wallet_balance = data.get('balance', 0)
+                response.success()
+            else:
+                response.failure(f"Get balance failed: {response.text}")
     
     def create_recipient_user(self):
         """Create a recipient user for P2P transfers"""
@@ -141,15 +137,14 @@ class NewUserJourney(TaskSet):
     @task(1)
     def get_transactions(self):
         """Get transaction history"""
-        response = self.client.get("/transactions",
+        with self.client.get("/transactions",
             headers=self.user.get_headers(),
             catch_response=True
-        )
-        
-        if response.status_code == 200:
-            response.success()
-        else:
-            response.failure(f"Get transactions failed: {response.text}")
+        ) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Get transactions failed: {response.text}")
 
 
 class ExistingUserJourney(TaskSet):
@@ -174,33 +169,31 @@ class ExistingUserJourney(TaskSet):
         if recipient_email:
             amount = random.uniform(5, min(50, self.user.wallet_balance * 0.1))
             
-            response = self.client.post("/transactions/p2p",
+            with self.client.post("/transactions/p2p",
                 json={
                     "recipientIdentifier": recipient_email,
                     "amount": amount
                 },
                 headers=self.user.get_headers(),
                 catch_response=True
-            )
-            
-            if response.status_code == 201:
-                self.user.wallet_balance -= amount
-                response.success()
-            else:
-                response.failure(f"P2P transfer failed: {response.text}")
+            ) as response:
+                if response.status_code == 201:
+                    self.user.wallet_balance -= amount
+                    response.success()
+                else:
+                    response.failure(f"P2P transfer failed: {response.text}")
     
     @task(1)
     def get_transactions(self):
         """Get transaction history"""
-        response = self.client.get("/transactions",
+        with self.client.get("/transactions",
             headers=self.user.get_headers(),
             catch_response=True
-        )
-        
-        if response.status_code == 200:
-            response.success()
-        else:
-            response.failure(f"Get transactions failed: {response.text}")
+        ) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Get transactions failed: {response.text}")
 
 
 class FrequentUserJourney(TaskSet):
@@ -226,50 +219,47 @@ class FrequentUserJourney(TaskSet):
             if recipient_email:
                 amount = random.uniform(1, 10)
                 
-                response = self.client.post("/transactions/p2p",
+                with self.client.post("/transactions/p2p",
                     json={
                         "recipientIdentifier": recipient_email,
                         "amount": amount
                     },
                     headers=self.user.get_headers(),
                     catch_response=True
-                )
-                
-                if response.status_code == 201:
-                    self.user.wallet_balance -= amount
-                    response.success()
-                else:
-                    response.failure(f"P2P transfer failed: {response.text}")
+                ) as response:
+                    if response.status_code == 201:
+                        self.user.wallet_balance -= amount
+                        response.success()
+                    else:
+                        response.failure(f"P2P transfer failed: {response.text}")
     
     @task(2)
     def get_transactions(self):
         """Get transaction history"""
-        response = self.client.get("/transactions",
+        with self.client.get("/transactions",
             headers=self.user.get_headers(),
             catch_response=True
-        )
-        
-        if response.status_code == 200:
-            response.success()
-        else:
-            response.failure(f"Get transactions failed: {response.text}")
+        ) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Get transactions failed: {response.text}")
     
     @task(1)
     def request_debin(self):
         """Request DEBIN"""
         amount = random.uniform(100, 1000)
         
-        response = self.client.post("/wallet/topup/debin",
+        with self.client.post("/wallet/topup/debin",
             json={"amount": amount},
             headers=self.user.get_headers(),
             catch_response=True
-        )
-        
-        if response.status_code == 201:
-            self.user.wallet_balance += amount
-            response.success()
-        else:
-            response.failure(f"DEBIN request failed: {response.text}")
+        ) as response:
+            if response.status_code == 201:
+                self.user.wallet_balance += amount
+                response.success()
+            else:
+                response.failure(f"DEBIN request failed: {response.text}")
 
 
 class DebinMassiveLoad(TaskSet):
@@ -280,16 +270,15 @@ class DebinMassiveLoad(TaskSet):
         """Make massive DEBIN requests"""
         amount = random.uniform(50, 500)
         
-        response = self.client.post("/wallet/topup/debin",
+        with self.client.post("/wallet/topup/debin",
             json={"amount": amount},
             headers=self.user.get_headers(),
             catch_response=True
-        )
-        
-        if response.status_code == 201:
-            response.success()
-        else:
-            response.failure(f"DEBIN request failed: {response.text}")
+        ) as response:
+            if response.status_code == 201:
+                response.success()
+            else:
+                response.failure(f"DEBIN request failed: {response.text}")
 
 
 # User classes for different scenarios
