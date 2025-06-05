@@ -30,6 +30,7 @@ services:
   # External bank service -> lo levanto usando la imagen de dockerhub
   eva-bank:
     image: ghcr.io/matichialvaa/eva-bank:latest
+    pull_policy: always
     container_name: eva-bank
     ports:
       - "3001:3001"
