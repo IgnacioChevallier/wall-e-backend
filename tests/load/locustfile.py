@@ -58,21 +58,23 @@ class WalletUser(HttpUser):
         }, catch_response=True) as response:
             if response.status_code == 200:
                 # Extract auth token from cookies
-                cookies = response.cookies
-                if 'access_token' in cookies:
-                    self.auth_token = cookies['access_token']
+                if 'access_token' in response.cookies:
+                    self.auth_token = response.cookies['access_token']
                     response.success()
                 else:
-                    response.failure("No auth token in response")
+                    response.failure("No auth token in response cookies")
             else:
                 response.failure(f"Login failed: {response.text}")
     
     def get_headers(self):
         """Get headers with authentication"""
-        return {
-            'Content-Type': 'application/json',
-            'Cookie': f'access_token={self.auth_token}' if self.auth_token else ''
-        }
+        return {'Content-Type': 'application/json'}
+    
+    def get_cookies(self):
+        """Get cookies with authentication"""
+        if self.auth_token:
+            return {'access_token': self.auth_token}
+        return {}
     
     def add_money_to_wallet(self, amount=100):
         """Add money to wallet via manual topup"""
@@ -83,6 +85,7 @@ class WalletUser(HttpUser):
                 "sourceIdentifier": f"BANK_{fake.random_number(digits=8)}"
             },
             headers=self.get_headers(),
+            cookies=self.get_cookies(),
             catch_response=True
         ) as response:
             if response.status_code == 201:
@@ -95,6 +98,7 @@ class WalletUser(HttpUser):
         """Get current wallet balance"""
         with self.client.get("/wallet/balance",
             headers=self.get_headers(),
+            cookies=self.get_cookies(),
             catch_response=True
         ) as response:
             if response.status_code == 200:
@@ -139,6 +143,7 @@ class NewUserJourney(TaskSet):
         """Get transaction history"""
         with self.client.get("/transactions",
             headers=self.user.get_headers(),
+            cookies=self.user.get_cookies(),
             catch_response=True
         ) as response:
             if response.status_code == 200:
@@ -175,6 +180,7 @@ class ExistingUserJourney(TaskSet):
                     "amount": amount
                 },
                 headers=self.user.get_headers(),
+                cookies=self.user.get_cookies(),
                 catch_response=True
             ) as response:
                 if response.status_code == 201:
@@ -188,6 +194,7 @@ class ExistingUserJourney(TaskSet):
         """Get transaction history"""
         with self.client.get("/transactions",
             headers=self.user.get_headers(),
+            cookies=self.user.get_cookies(),
             catch_response=True
         ) as response:
             if response.status_code == 200:
@@ -225,6 +232,7 @@ class FrequentUserJourney(TaskSet):
                         "amount": amount
                     },
                     headers=self.user.get_headers(),
+                    cookies=self.user.get_cookies(),
                     catch_response=True
                 ) as response:
                     if response.status_code == 201:
@@ -238,6 +246,7 @@ class FrequentUserJourney(TaskSet):
         """Get transaction history"""
         with self.client.get("/transactions",
             headers=self.user.get_headers(),
+            cookies=self.user.get_cookies(),
             catch_response=True
         ) as response:
             if response.status_code == 200:
@@ -253,6 +262,7 @@ class FrequentUserJourney(TaskSet):
         with self.client.post("/wallet/topup/debin",
             json={"amount": amount},
             headers=self.user.get_headers(),
+            cookies=self.user.get_cookies(),
             catch_response=True
         ) as response:
             if response.status_code == 201:
@@ -273,6 +283,7 @@ class DebinMassiveLoad(TaskSet):
         with self.client.post("/wallet/topup/debin",
             json={"amount": amount},
             headers=self.user.get_headers(),
+            cookies=self.user.get_cookies(),
             catch_response=True
         ) as response:
             if response.status_code == 201:

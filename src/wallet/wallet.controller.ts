@@ -66,6 +66,7 @@ export class WalletController {
   }
 
   @Post('topup/manual')
+  @UseGuards(AuthGuard('jwt'))
   async addMoneyManual(@Request() req, @Body() addMoneyDto: AddMoneyDto) {
     return this.walletService.addMoney(req.user.id, addMoneyDto);
   }
