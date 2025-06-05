@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # Database for load testing
+  db:
+    image: postgres:15-alpine
+    container_name: walle-loadtest-db
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: loadtest
+      POSTGRES_PASSWORD: loadtest123
+      POSTGRES_DB: walle_loadtest
+    volumes:
+      - loadtest_db_data:/var/lib/postgresql/data
+
+  # Backend app for load testing
+  app:
+    build: 
+      context: ../../
+      dockerfile: Dockerfile
+    container_name: walle-loadtest-app
+    ports:
+      - "3003:3000"
+    environment:
+      DATABASE_URL: "postgresql://loadtest:loadtest123@db:5432/walle_loadtest"
+      JWT_SECRET: "loadtest-secret-key-12345"
+      BANK_API_URL: "http://eva-bank:3001"
+      NODE_ENV: "production"
+    depends_on:
+      - db
+      - eva-bank
+    command: sh -c "npx prisma migrate deploy && node dist/main"
+
+  # External bank service for load testing
+  eva-bank:
+    image: ghcr.io/matichialvaa/eva-bank:latest
+    container_name: eva-bank-loadtest
+    ports:
+      - "3004:3001"
+
+  # Load testing service
+  load-test:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: walle-load-test
+    ports:
+      - "8089:8089"  # Locust web UI
+    depends_on:
+      - app
+    volumes:
+      - .:/app
+    environment:
+      - TARGET_HOST=http://app:3000
+
+volumes:
+  loadtest_db_data: 
