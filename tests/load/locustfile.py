@@ -20,6 +20,7 @@ fake = Faker()
 class WalletUser(HttpUser):
     """Base user class for Wall-E wallet testing"""
     
+    abstract = True  # Mark as abstract to prevent direct instantiation
     wait_time = between(1, 3)
     host = os.getenv('API_HOST', 'http://localhost:3000')
     

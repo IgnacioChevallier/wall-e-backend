@@ -35,6 +35,7 @@ services:
   # External bank service for load testing
   eva-bank:
     image: ghcr.io/matichialvaa/eva-bank:latest
+    pull_policy: always
     container_name: eva-bank-loadtest
     ports:
       - "3004:3001"
