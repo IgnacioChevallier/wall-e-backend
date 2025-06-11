@@ -9,12 +9,14 @@ import { Wallet } from '../../generated/prisma';
 import { AddMoneyDto, PaymentMethod } from './dto/add-money.dto';
 import { WithdrawMoneyDto } from './dto/withdraw-money.dto';
 import { ExternalBankService } from '../external-bank/external-bank.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class WalletService {
   constructor(
     private prisma: PrismaService,
     private externalBankService: ExternalBankService,
+    private usersService: UsersService,
   ) {}
 
   create(userId: string) {
@@ -97,11 +99,12 @@ export class WalletService {
 
   async addMoney(userId: string, addMoneyDto: AddMoneyDto) {
     const wallet = await this.getWalletByUserId(userId);
+    const user = await this.usersService.findOne(userId);
 
-    // Verificar con el servicio externo simulado
+    // Verificar con el servicio externo simulado usando el alias del usuario
     const externalResponse = await this.externalBankService.Transfer({
       amount: addMoneyDto.amount,
-      toWalletId: wallet.id,
+      alias: user.alias,
       source: addMoneyDto.sourceIdentifier || 'unknown',
     });
 
@@ -217,6 +220,78 @@ export class WalletService {
         data: {
           balance: {
             increment: amount,
+          },
+        },
+        include: {
+          allTransactions: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+        },
+      });
+
+      return {
+        success: true,
+        balance: updatedWallet.balance,
+        transaction: transaction,
+      };
+    });
+
+    return result;
+  }
+
+  async addMoneyDirect(userId: string, data: { amount: number; description: string; source: string }) {
+    const wallet = await this.getWalletByUserId(userId);
+
+    // Usar una transacción de base de datos para asegurar consistencia
+    const result = await this.prisma.$transaction(async (prisma) => {
+      // Primero creamos o buscamos un usuario del sistema
+      const systemUser = await prisma.user.upsert({
+        where: { email: 'system@walle.internal' },
+        update: {},
+        create: {
+          email: 'system@walle.internal',
+          alias: 'SYSTEM',
+          password: 'N/A', // Sistema no necesita password real
+        },
+      });
+
+      // Luego creamos o buscamos una wallet del sistema
+      const systemWallet =
+        (await prisma.wallet.findFirst({
+          where: { userId: systemUser.id },
+        })) ||
+        (await prisma.wallet.create({
+          data: {
+            userId: systemUser.id,
+            balance: 0,
+          },
+        }));
+
+      // Crear la transacción
+      const transaction = await prisma.transaction.create({
+        data: {
+          amount: data.amount,
+          type: 'IN',
+          description: data.description,
+          effectedWallet: {
+            connect: { id: wallet.id },
+          },
+          senderWallet: {
+            connect: { id: systemWallet.id },
+          },
+          receiverWallet: {
+            connect: { id: wallet.id },
+          },
+        },
+      });
+
+      // Actualizar el balance de la wallet
+      const updatedWallet = await prisma.wallet.update({
+        where: { id: wallet.id },
+        data: {
+          balance: {
+            increment: data.amount,
           },
         },
         include: {

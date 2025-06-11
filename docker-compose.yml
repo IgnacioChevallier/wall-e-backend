@@ -1,6 +1,8 @@
 services:
   app:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
     container_name: walle-app
     ports:
       - "3000:3000"
@@ -34,6 +36,8 @@ services:
     container_name: eva-bank
     ports:
       - "3001:3001"
+    environment:
+      WALLE_BACKEND_URL: http://walle-app:3000
 
 volumes:
   postgres_data:
