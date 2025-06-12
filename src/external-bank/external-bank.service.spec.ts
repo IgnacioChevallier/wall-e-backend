@@ -34,7 +34,7 @@ describe('ExternalBankService', () => {
   describe('Transfer', () => {
     const transferRequest = {
       amount: 100,
-      toWalletId: 'test-wallet',
+      alias: 'test-wallet',
       source: 'test-bank',
     };
 
