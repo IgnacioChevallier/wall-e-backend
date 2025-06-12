@@ -2,16 +2,32 @@ name: Load Tests
 
 on:
   workflow_call:
+    inputs:
+      test_type:
+        description: 'Type of test to run'
+        required: true
+        type: string
+        default: 'load'
+      users:
+        description: 'Number of concurrent users'
+        required: false
+        type: string
+        default: '100'
+      duration:
+        description: 'Test duration (e.g., 5m, 300s)'
+        required: false
+        type: string
+        default: '5m'
+        
   workflow_dispatch:
     inputs:
       test_type:
         description: 'Type of test to run'
         required: true
-        default: 'load'
         type: choice
         options:
-        - load
-        - stress
+          - load
+          - stress
       users:
         description: 'Number of concurrent users'
         required: false
