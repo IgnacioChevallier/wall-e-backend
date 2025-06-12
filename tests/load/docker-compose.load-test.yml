@@ -13,6 +13,15 @@ services:
       POSTGRES_DB: walle_loadtest
     volumes:
       - loadtest_db_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    restart: unless-stopped
 
   # Backend app for load testing
   app:
@@ -31,6 +40,15 @@ services:
       - db
       - eva-bank
     command: sh -c "npx prisma migrate deploy && node dist/main"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '1.0'
+          memory: 512M
+    restart: unless-stopped
 
   # External bank service for load testing
   eva-bank:
@@ -39,6 +57,15 @@ services:
     container_name: eva-bank-loadtest
     ports:
       - "3004:3001"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    restart: unless-stopped
 
   # Load testing service
   load-test:
