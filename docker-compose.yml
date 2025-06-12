@@ -1,6 +1,8 @@
 services:
   app:
-    build: .
+    build: 
+      context: .
+      target: development
     container_name: walle-app
     ports:
       - "3000:3000"
@@ -14,6 +16,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+    command: ["npm", "run", "start:dev"]
 
   db:
     image: postgres:15-alpine
@@ -34,6 +37,8 @@ services:
     container_name: eva-bank
     ports:
       - "3001:3001"
+    environment:
+      WALLE_BACKEND_URL: http://walle-app:3000
 
 volumes:
   postgres_data:

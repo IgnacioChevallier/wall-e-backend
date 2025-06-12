@@ -7,7 +7,7 @@ export class ExternalBankController {
 
   @Post('/transfer')
   async simulateTransfer(
-    @Body() data: { amount: number; toWalletId: string; source: string },
+    @Body() data: { amount: number; alias: string; source: string },
   ) {
     return this.externalBankService.Transfer(data);
   }
@@ -15,5 +15,12 @@ export class ExternalBankController {
   @Post('/debin-request')
   async simulateDebin(@Body() data: { amount: number; toWalletId: string }) {
     return this.externalBankService.ExecuteDebin(data);
+  }
+
+  @Post('/deposit')
+  async depositMoney(
+    @Body() data: { amount: number; alias: string; source: string },
+  ) {
+    return this.externalBankService.depositMoney(data);
   }
 }
