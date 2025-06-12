@@ -53,15 +53,20 @@ describe('TransactionsController (e2e)', () => {
       .send({
         email: testEmail,
         password: 'password123',
-        alias: testAlias
+        alias: testAlias,
       })
       .expect(201);
 
     // Extract the cookie from the response
     const cookies = registerResponse.headers['set-cookie'];
     if (Array.isArray(cookies)) {
-      authCookie = cookies.find((cookie: string) => cookie.startsWith('access_token=')) || '';
-    } else if (typeof cookies === 'string' && cookies.startsWith('access_token=')) {
+      authCookie =
+        cookies.find((cookie: string) => cookie.startsWith('access_token=')) ||
+        '';
+    } else if (
+      typeof cookies === 'string' &&
+      cookies.startsWith('access_token=')
+    ) {
       authCookie = cookies;
     } else {
       authCookie = '';
@@ -70,7 +75,7 @@ describe('TransactionsController (e2e)', () => {
     // Get user data by querying the database directly since registration doesn't return user data
     const user = await prisma.user.findUnique({
       where: { email: testEmail },
-      include: { wallet: true }
+      include: { wallet: true },
     });
 
     if (!user) {
@@ -85,10 +90,10 @@ describe('TransactionsController (e2e)', () => {
       const transactionResponse = await request(app.getHttpServer())
         .post('/transactions')
         .send({
-          amount: 100.50,
+          amount: 100.5,
           type: 'IN', // Use correct transaction type from schema
           walletId: testWalletId,
-          description: 'Test transaction'
+          description: 'Test transaction',
         })
         .expect(201);
 
@@ -137,10 +142,10 @@ describe('TransactionsController (e2e)', () => {
   describe('/transactions (POST)', () => {
     it('should create a new transaction', () => {
       const newTransaction = {
-        amount: 100.50,
+        amount: 100.5,
         type: 'IN', // Use correct transaction type from schema
         walletId: testWalletId, // Use the actual test wallet ID
-        description: 'Test transaction'
+        description: 'Test transaction',
       };
 
       return request(app.getHttpServer())
@@ -159,7 +164,7 @@ describe('TransactionsController (e2e)', () => {
       const invalidTransaction = {
         amount: 'invalid-amount',
         type: 'INVALID_TYPE',
-        walletId: testWalletId
+        walletId: testWalletId,
       };
 
       return request(app.getHttpServer())
@@ -170,7 +175,7 @@ describe('TransactionsController (e2e)', () => {
 
     it('should return 400 for missing required fields', () => {
       const incompleteTransaction = {
-        amount: 100.50,
+        amount: 100.5,
         // Missing type and walletId
       };
 
@@ -196,14 +201,14 @@ describe('TransactionsController (e2e)', () => {
         .send({
           email: recipientEmail,
           password: 'password123',
-          alias: recipientAlias
+          alias: recipientAlias,
         })
         .expect(201);
 
       // Get recipient user data
       const recipientUser = await prisma.user.findUnique({
         where: { email: recipientEmail },
-        include: { wallet: true }
+        include: { wallet: true },
       });
 
       if (!recipientUser) {
@@ -216,7 +221,7 @@ describe('TransactionsController (e2e)', () => {
       if (testWalletId) {
         await prisma.wallet.update({
           where: { id: testWalletId },
-          data: { balance: 1000.0 } // Add sufficient balance for transfers
+          data: { balance: 1000.0 }, // Add sufficient balance for transfers
         });
       }
     });
@@ -224,7 +229,7 @@ describe('TransactionsController (e2e)', () => {
     it('should create a P2P transfer with valid auth cookie', () => {
       const p2pTransfer = {
         recipientIdentifier: recipientEmail, // Use the actual recipient email
-        amount: 50.25
+        amount: 50.25,
       };
 
       return request(app.getHttpServer())
@@ -243,7 +248,7 @@ describe('TransactionsController (e2e)', () => {
     it('should return 401 for P2P transfer without auth cookie', () => {
       const p2pTransfer = {
         recipientIdentifier: recipientEmail,
-        amount: 50.25
+        amount: 50.25,
       };
 
       return request(app.getHttpServer())
@@ -255,7 +260,7 @@ describe('TransactionsController (e2e)', () => {
     it('should return 400 for invalid P2P transfer data', () => {
       const invalidP2pTransfer = {
         recipientIdentifier: '',
-        amount: -10 // Negative amount should be invalid
+        amount: -10, // Negative amount should be invalid
       };
 
       return request(app.getHttpServer())
@@ -270,7 +275,7 @@ describe('TransactionsController (e2e)', () => {
     it('should update an existing transaction', () => {
       const updateData = {
         amount: 150.75,
-        description: 'Updated transaction description'
+        description: 'Updated transaction description',
       };
 
       return request(app.getHttpServer())
@@ -288,7 +293,7 @@ describe('TransactionsController (e2e)', () => {
       const nonExistentId = 'non-existent-id';
       const updateData = {
         amount: 150.75,
-        description: 'Updated transaction'
+        description: 'Updated transaction',
       };
 
       return request(app.getHttpServer())
@@ -299,7 +304,7 @@ describe('TransactionsController (e2e)', () => {
 
     it('should return 400 for invalid update data', () => {
       const invalidUpdateData = {
-        amount: 'invalid-amount'
+        amount: 'invalid-amount',
       };
 
       return request(app.getHttpServer())

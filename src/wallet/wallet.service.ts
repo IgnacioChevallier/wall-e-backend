@@ -99,10 +99,10 @@ export class WalletService {
 
   async addMoney(userId: string, addMoneyDto: AddMoneyDto) {
     console.log('💰 addMoney called:', { userId, addMoneyDto });
-    
+
     const wallet = await this.getWalletByUserId(userId);
     console.log('👛 Found wallet:', wallet.id);
-    
+
     const user = await this.usersService.findOne(userId);
     console.log('👤 Found user:', { id: user.id, alias: user.alias });
 
@@ -248,7 +248,10 @@ export class WalletService {
     return result;
   }
 
-  async addMoneyDirect(userId: string, data: { amount: number; description: string; source: string }) {
+  async addMoneyDirect(
+    userId: string,
+    data: { amount: number; description: string; source: string },
+  ) {
     const wallet = await this.getWalletByUserId(userId);
 
     // Usar una transacción de base de datos para asegurar consistencia

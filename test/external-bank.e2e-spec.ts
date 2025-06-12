@@ -37,22 +37,25 @@ describe('External Bank Integration (e2e)', () => {
 
     prisma = moduleFixture.get<PrismaService>(PrismaService);
     authService = moduleFixture.get<AuthService>(AuthService);
-    externalBankService = moduleFixture.get<ExternalBankService>(ExternalBankService);
+    externalBankService =
+      moduleFixture.get<ExternalBankService>(ExternalBankService);
 
     // Mock the external bank service HTTP calls since eva-bank doesn't have the required endpoints
-    jest.spyOn(externalBankService, 'Transfer').mockImplementation(async (data) => {
-      return {
+    jest.spyOn(externalBankService, 'Transfer').mockImplementation((data) => {
+      return Promise.resolve({
         success: true,
         transactionId: `TR${Math.floor(Math.random() * 10000)}`,
-      };
+      });
     });
 
-    jest.spyOn(externalBankService, 'ExecuteDebin').mockImplementation(async (data) => {
-      return {
-        approved: true,
-        debinId: `DB${Math.floor(Math.random() * 10000)}`,
-      };
-    });
+    jest
+      .spyOn(externalBankService, 'ExecuteDebin')
+      .mockImplementation((data) => {
+        return Promise.resolve({
+          approved: true,
+          debinId: `DB${Math.floor(Math.random() * 10000)}`,
+        });
+      });
 
     await app.init();
 

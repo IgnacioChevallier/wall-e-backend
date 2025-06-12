@@ -1,4 +1,10 @@
-import { Injectable, HttpException, HttpStatus, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -21,8 +27,7 @@ export class ExternalBankService {
     private readonly prisma: PrismaService,
   ) {
     this.bankApiUrl =
-      this.configService.get<string>('BANK_API_URL') ||
-      'http://eva-bank:3001';
+      this.configService.get<string>('BANK_API_URL') || 'http://eva-bank:3001';
   }
 
   async Transfer(data: BankTransferRequest): Promise<BankTransferResponse> {
@@ -30,12 +35,12 @@ export class ExternalBankService {
       const url = `${this.bankApiUrl}${BANK_API_ENDPOINTS.transfer}`;
       console.log('🔍 Transfer URL:', url);
       console.log('🔍 bankApiUrl:', this.bankApiUrl);
-      console.log('🔍 BANK_API_ENDPOINTS.transfer:', BANK_API_ENDPOINTS.transfer);
-      
-      const response = await axios.post<BankTransferResponse>(
-        url,
-        data,
+      console.log(
+        '🔍 BANK_API_ENDPOINTS.transfer:',
+        BANK_API_ENDPOINTS.transfer,
       );
+
+      const response = await axios.post<BankTransferResponse>(url, data);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -54,11 +59,8 @@ export class ExternalBankService {
       console.log('🔍 Debin URL:', url);
       console.log('🔍 bankApiUrl:', this.bankApiUrl);
       console.log('🔍 BANK_API_ENDPOINTS.debin:', BANK_API_ENDPOINTS.debin);
-      
-      const response = await axios.post<DebinResponse>(
-        url,
-        data,
-      );
+
+      const response = await axios.post<DebinResponse>(url, data);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -71,12 +73,19 @@ export class ExternalBankService {
     }
   }
 
-  async depositMoney(data: { amount: number; alias: string; source: string }): Promise<{ success: boolean; message?: string; error?: string }> {
+  async depositMoney(data: {
+    amount: number;
+    alias: string;
+    source: string;
+  }): Promise<{ success: boolean; message?: string; error?: string }> {
     try {
       // Find user by alias
       const user = await this.usersService.findByAlias(data.alias);
       if (!user) {
-        return { success: false, error: `User with alias ${data.alias} not found` };
+        return {
+          success: false,
+          error: `User with alias ${data.alias} not found`,
+        };
       }
 
       // Get user's wallet
@@ -84,7 +93,10 @@ export class ExternalBankService {
         where: { userId: user.id },
       });
       if (!wallet) {
-        return { success: false, error: `Wallet for user ${data.alias} not found` };
+        return {
+          success: false,
+          error: `Wallet for user ${data.alias} not found`,
+        };
       }
 
       // Use a database transaction to ensure consistency
