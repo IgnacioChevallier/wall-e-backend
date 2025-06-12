@@ -34,6 +34,8 @@ services:
     container_name: eva-bank
     ports:
       - "3001:3001"
+    environment:
+      WALLE_BACKEND_URL: http://walle-app:3000
 
 volumes:
   postgres_data:

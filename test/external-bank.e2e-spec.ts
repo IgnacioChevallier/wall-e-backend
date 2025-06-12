@@ -7,11 +7,13 @@ import { AuthService } from '../src/auth/auth.service';
 import { TransactionType } from '../generated/prisma';
 import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
+import { ExternalBankService } from '../src/external-bank/external-bank.service';
 
 describe('External Bank Integration (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let authService: AuthService;
+  let externalBankService: ExternalBankService;
   let userCookie: string;
   let testUserId: string;
   let testWalletId: string;
@@ -35,6 +37,22 @@ describe('External Bank Integration (e2e)', () => {
 
     prisma = moduleFixture.get<PrismaService>(PrismaService);
     authService = moduleFixture.get<AuthService>(AuthService);
+    externalBankService = moduleFixture.get<ExternalBankService>(ExternalBankService);
+
+    // Mock the external bank service HTTP calls since eva-bank doesn't have the required endpoints
+    jest.spyOn(externalBankService, 'Transfer').mockImplementation(async (data) => {
+      return {
+        success: true,
+        transactionId: `TR${Math.floor(Math.random() * 10000)}`,
+      };
+    });
+
+    jest.spyOn(externalBankService, 'ExecuteDebin').mockImplementation(async (data) => {
+      return {
+        approved: true,
+        debinId: `DB${Math.floor(Math.random() * 10000)}`,
+      };
+    });
 
     await app.init();
 
@@ -101,7 +119,7 @@ describe('External Bank Integration (e2e)', () => {
     it('should successfully call external bank transfer endpoint', async () => {
       const transferData = {
         amount: 100,
-        toWalletId: 'external-wallet-123',
+        alias: 'external-wallet-123', // Changed from toWalletId to alias
         source: 'TRANSFER',
       };
 
@@ -119,7 +137,7 @@ describe('External Bank Integration (e2e)', () => {
     it('should fail transfer with missing required fields', async () => {
       const transferData = {
         amount: 50,
-        // Missing toWalletId and source
+        // Missing alias and source
       };
 
       await request(app.getHttpServer())

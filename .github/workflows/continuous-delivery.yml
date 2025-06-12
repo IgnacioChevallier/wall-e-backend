@@ -1,8 +1,16 @@
-name: NestJS Backend CD
+name: continuous delivery
 
 on:
-  push:
-    branches: [master]
+  workflow_call:
+    inputs:
+      branch_name:
+        description: 'The name of the branch being built'
+        required: true
+        type: string
+    secrets:
+      WALLE_TOKEN:
+        required: true
+
     
 jobs:
   build-and-publish:

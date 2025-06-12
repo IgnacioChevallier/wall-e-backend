@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { WalletService } from './wallet.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExternalBankService } from '../external-bank/external-bank.service';
+import { UsersService } from '../users/users.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PaymentMethod } from './dto/add-money.dto';
 
@@ -28,6 +29,12 @@ const mockExternalBankService = {
   ExecuteDebin: jest.fn(),
 };
 
+// Mock the UsersService
+const mockUsersService = {
+  findOne: jest.fn(),
+  findByAlias: jest.fn(),
+};
+
 describe('WalletService', () => {
   let service: WalletService;
   let prismaService: PrismaService;
@@ -46,6 +53,10 @@ describe('WalletService', () => {
         {
           provide: ExternalBankService,
           useValue: mockExternalBankService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
         },
       ],
     }).compile();
@@ -84,6 +95,14 @@ describe('WalletService', () => {
     };
 
     it('should successfully add money when bank transfer is approved', async () => {
+      // Mock user lookup
+      const mockUser = {
+        id: userId,
+        alias: 'test-user-alias',
+        email: 'test@example.com',
+      };
+      mockUsersService.findOne.mockResolvedValue(mockUser);
+
       // Mock successful external bank response
       mockExternalBankService.Transfer.mockResolvedValue({
         success: true,
@@ -117,12 +136,20 @@ describe('WalletService', () => {
       expect(result.balance).toBe(amount);
       expect(mockExternalBankService.Transfer).toHaveBeenCalledWith({
         amount,
-        toWalletId: walletId,
+        alias: 'test-user-alias',
         source: sourceIdentifier,
       });
     });
 
     it('should throw BadRequestException when bank transfer is declined', async () => {
+      // Mock user lookup
+      const mockUser = {
+        id: userId,
+        alias: 'test-user-alias',
+        email: 'test@example.com',
+      };
+      mockUsersService.findOne.mockResolvedValue(mockUser);
+
       // Mock failed external bank response
       mockExternalBankService.Transfer.mockResolvedValue({
         success: false,

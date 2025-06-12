@@ -309,6 +309,28 @@ describe('TransactionsService', () => {
       );
     });
 
+    it('should throw BadRequestException for insufficient funds', async () => {
+      const mockSenderWalletWithInsufficientFunds = {
+        ...mockSenderWallet,
+        balance: 50,
+      };
+
+      jest.spyOn(usersService, 'findOne').mockResolvedValue(mockSender);
+      jest
+        .spyOn(usersService, 'findByEmailOrAlias')
+        .mockResolvedValue(mockRecipient);
+      jest
+        .spyOn(walletService, 'getWalletByUserId')
+        .mockResolvedValueOnce(mockSenderWalletWithInsufficientFunds)
+        .mockResolvedValueOnce(mockRecipientWallet);
+
+      await expect(
+        service.createP2PTransfer('sender-id', p2pTransferDto),
+      ).rejects.toThrow(new BadRequestException('Insufficient funds.'));
+
+      expect(transactionsRepository.createP2PTransfer).not.toHaveBeenCalled();
+    });
+
     it('should throw BadRequestException when repository throws an error', async () => {
       jest.spyOn(usersService, 'findOne').mockResolvedValue(mockSender);
       jest
