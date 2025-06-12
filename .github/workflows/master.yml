@@ -11,10 +11,19 @@ jobs:
     name: continuous integration
     uses: ./.github/workflows/continuous-integration.yml
 
+  load-tests:
+    name: load tests
+    needs: continuous-integration
+    uses: ./.github/workflows/load-tests.yml
+    with:
+      test_type: 'load'
+      users: '100'
+      duration: '5m'
+
   continuous-delivery:
     name: continuous delivery
-    needs: continuous-integration
-    if: github.ref_name == 'main'
+    needs: load-tests
+    if: github.ref_name == 'master'
     uses: ./.github/workflows/continuous-delivery.yml
     with:
       branch_name: ${{ github.ref_name }}
