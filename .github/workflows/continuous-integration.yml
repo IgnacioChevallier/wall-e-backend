@@ -1,10 +1,7 @@
-name: NestJS Backend CI
+name: continuous integration
 
 on:
-  push:
-    branches: ['*', '!master']
-  pull_request:
-    branches: [master]
+  workflow_call:
 
 jobs:
   build-and-test:
