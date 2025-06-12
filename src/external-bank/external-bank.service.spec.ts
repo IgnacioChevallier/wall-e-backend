@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { ExternalBankService } from './external-bank.service';
 import { HttpException } from '@nestjs/common';
 import { BANK_API_ENDPOINTS } from './bank-api.interface';
+import { UsersService } from '../users/users.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 // Mock axios
 jest.mock('axios');
@@ -16,6 +18,25 @@ describe('ExternalBankService', () => {
     get: jest.fn().mockReturnValue('http://bank-service:3001'),
   };
 
+  const mockUsersService = {
+    findByAlias: jest.fn(),
+    findOne: jest.fn(),
+  };
+
+  const mockPrismaService = {
+    wallet: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
+    user: {
+      upsert: jest.fn(),
+    },
+    transaction: {
+      create: jest.fn(),
+    },
+    $transaction: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -23,6 +44,14 @@ describe('ExternalBankService', () => {
         {
           provide: ConfigService,
           useValue: mockConfigService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: PrismaService,
+          useValue: mockPrismaService,
         },
       ],
     }).compile();
