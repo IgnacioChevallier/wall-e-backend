@@ -2,7 +2,7 @@ services:
   app:
     build: 
       context: .
-      dockerfile: Dockerfile.dev
+      target: development
     container_name: walle-app
     ports:
       - "3000:3000"
@@ -16,6 +16,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+    command: ["npm", "run", "start:dev"]
 
   db:
     image: postgres:15-alpine

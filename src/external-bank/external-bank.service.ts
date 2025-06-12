@@ -9,7 +9,7 @@ import {
   BANK_API_ENDPOINTS,
 } from './bank-api.interface';
 import { UsersService } from '../users/users.service';
-import { WalletService } from '../wallet/wallet.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ExternalBankService {
@@ -18,8 +18,7 @@ export class ExternalBankService {
   constructor(
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
-    @Inject(forwardRef(() => WalletService))
-    private readonly walletService: WalletService,
+    private readonly prisma: PrismaService,
   ) {
     this.bankApiUrl =
       this.configService.get<string>('BANK_API_URL') ||
@@ -71,19 +70,74 @@ export class ExternalBankService {
       }
 
       // Get user's wallet
-      const wallet = await this.walletService.getWalletByUserId(user.id);
+      const wallet = await this.prisma.wallet.findUnique({
+        where: { userId: user.id },
+      });
       if (!wallet) {
         return { success: false, error: `Wallet for user ${data.alias} not found` };
       }
 
-      // Add money to the wallet (this will create the necessary transaction records)
-      await this.walletService.addMoneyDirect(user.id, {
-        amount: data.amount,
-        description: `External transfer from ${data.source}`,
-        source: data.source,
+      // Use a database transaction to ensure consistency
+      const result = await this.prisma.$transaction(async (prisma) => {
+        // Create or find system user
+        const systemUser = await prisma.user.upsert({
+          where: { email: 'system@walle.internal' },
+          update: {},
+          create: {
+            email: 'system@walle.internal',
+            alias: 'SYSTEM',
+            password: 'N/A',
+          },
+        });
+
+        // Create or find system wallet
+        const systemWallet =
+          (await prisma.wallet.findFirst({
+            where: { userId: systemUser.id },
+          })) ||
+          (await prisma.wallet.create({
+            data: {
+              userId: systemUser.id,
+              balance: 0,
+            },
+          }));
+
+        // Create the transaction
+        const transaction = await prisma.transaction.create({
+          data: {
+            amount: data.amount,
+            type: 'IN',
+            description: `External transfer from ${data.source}`,
+            effectedWallet: {
+              connect: { id: wallet.id },
+            },
+            senderWallet: {
+              connect: { id: systemWallet.id },
+            },
+            receiverWallet: {
+              connect: { id: wallet.id },
+            },
+          },
+        });
+
+        // Update the wallet balance
+        const updatedWallet = await prisma.wallet.update({
+          where: { id: wallet.id },
+          data: {
+            balance: {
+              increment: data.amount,
+            },
+          },
+        });
+
+        return {
+          success: true,
+          message: 'Money deposited successfully',
+          balance: updatedWallet.balance,
+        };
       });
 
-      return { success: true, message: 'Money deposited successfully' };
+      return result;
     } catch (error) {
       console.error('Error depositing money:', error);
       return { success: false, error: 'Failed to deposit money' };

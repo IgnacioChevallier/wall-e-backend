@@ -15,8 +15,8 @@ import { UsersService } from '../users/users.service';
 export class WalletService {
   constructor(
     private prisma: PrismaService,
-    private externalBankService: ExternalBankService,
     private usersService: UsersService,
+    private externalBankService: ExternalBankService,
   ) {}
 
   create(userId: string) {
