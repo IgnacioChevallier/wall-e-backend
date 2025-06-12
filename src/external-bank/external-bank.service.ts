@@ -27,8 +27,13 @@ export class ExternalBankService {
 
   async Transfer(data: BankTransferRequest): Promise<BankTransferResponse> {
     try {
+      const url = `${this.bankApiUrl}${BANK_API_ENDPOINTS.transfer}`;
+      console.log('🔍 Transfer URL:', url);
+      console.log('🔍 bankApiUrl:', this.bankApiUrl);
+      console.log('🔍 BANK_API_ENDPOINTS.transfer:', BANK_API_ENDPOINTS.transfer);
+      
       const response = await axios.post<BankTransferResponse>(
-        `${this.bankApiUrl}${BANK_API_ENDPOINTS.transfer}`,
+        url,
         data,
       );
       return response.data;
@@ -45,8 +50,13 @@ export class ExternalBankService {
 
   async ExecuteDebin(data: DebinRequest): Promise<DebinResponse> {
     try {
+      const url = `${this.bankApiUrl}${BANK_API_ENDPOINTS.debin}`;
+      console.log('🔍 Debin URL:', url);
+      console.log('🔍 bankApiUrl:', this.bankApiUrl);
+      console.log('🔍 BANK_API_ENDPOINTS.debin:', BANK_API_ENDPOINTS.debin);
+      
       const response = await axios.post<DebinResponse>(
-        `${this.bankApiUrl}${BANK_API_ENDPOINTS.debin}`,
+        url,
         data,
       );
       return response.data;

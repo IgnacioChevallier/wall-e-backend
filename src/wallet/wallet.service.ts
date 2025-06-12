@@ -98,17 +98,25 @@ export class WalletService {
   }
 
   async addMoney(userId: string, addMoneyDto: AddMoneyDto) {
+    console.log('💰 addMoney called:', { userId, addMoneyDto });
+    
     const wallet = await this.getWalletByUserId(userId);
+    console.log('👛 Found wallet:', wallet.id);
+    
     const user = await this.usersService.findOne(userId);
+    console.log('👤 Found user:', { id: user.id, alias: user.alias });
 
     // Verificar con el servicio externo simulado usando el alias del usuario
+    console.log('🏦 Calling external bank service...');
     const externalResponse = await this.externalBankService.Transfer({
       amount: addMoneyDto.amount,
       alias: user.alias,
       source: addMoneyDto.sourceIdentifier || 'unknown',
     });
+    console.log('🏦 External bank response:', externalResponse);
 
     if (!externalResponse.success) {
+      console.log('❌ External transfer failed:', externalResponse.error);
       throw new BadRequestException(
         externalResponse.error || 'External transfer failed',
       );

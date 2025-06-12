@@ -6,8 +6,7 @@ Main configuration file for performance testing
 import os
 import json
 import random
-import time
-import uuid
+import requests
 from faker import Faker
 from locust import HttpUser, TaskSet, task, between, events
 from locust.env import Environment
@@ -18,6 +17,38 @@ load_dotenv()
 
 # Configuration
 fake = Faker()
+
+# Constant user for external bank transfers
+CONSTANT_BANK_USER = {
+    "email": "bank_transfer_user@loadtest.com", 
+    "password": "BankTransfer123!",
+    "alias": "bank_transfer_user"
+}
+
+def create_constant_bank_user():
+    """Create a constant user for external bank transfers"""
+    try:
+        host = os.getenv('API_HOST', 'http://localhost:3000')
+        
+        # Try to register the constant user
+        response = requests.post(f"{host}/auth/register", json={
+            "email": CONSTANT_BANK_USER["email"],
+            "password": CONSTANT_BANK_USER["password"]
+        })
+        
+        if response.status_code == 201:
+            print(f"✅ Created constant bank user: {CONSTANT_BANK_USER['alias']}")
+            return True
+        elif response.status_code == 400 and "already exists" in response.text:
+            print(f"✅ Constant bank user already exists: {CONSTANT_BANK_USER['alias']}")
+            return True
+        else:
+            print(f"❌ Failed to create constant bank user: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error creating constant bank user: {e}")
+        return False
 
 class WalletUser(HttpUser):
     """Base user class for Wall-E wallet testing"""
@@ -33,19 +64,16 @@ class WalletUser(HttpUser):
         self.wallet_balance = 0
         self.user_email = None
         self.user_alias = None
-        self.user_id = str(uuid.uuid4())[:8]  # Unique identifier for this user instance
     
     def on_start(self):
         """Setup method called when user starts"""
         self.register_user()
-        if self.auth_token:  # Only login if registration was successful
+        if self.auth_token:
             self.login_user()
     
     def register_user(self):
-        """Register a new user with unique email"""
-        # Generate unique email with timestamp and user_id to avoid duplicates
-        timestamp = int(time.time())
-        self.user_email = f"loadtest_{self.user_id}_{timestamp}@example.com"
+        """Register a new user"""
+        self.user_email = fake.email()
         password = "TestPassword123!"
         
         with self.client.post("/auth/register", json={
@@ -54,14 +82,6 @@ class WalletUser(HttpUser):
         }, catch_response=True) as response:
             if response.status_code == 201:
                 response.success()
-                # Extract user data if available
-                try:
-                    data = response.json()
-                    if 'user' in data:
-                        self.user_data = data['user']
-                        self.user_alias = data['user'].get('alias', f"user_{self.user_id}")
-                except:
-                    self.user_alias = f"user_{self.user_id}"
             else:
                 response.failure(f"Registration failed: {response.text}")
             
@@ -91,46 +111,28 @@ class WalletUser(HttpUser):
             return {'access_token': self.auth_token}
         return {}
     
-    def add_money_to_wallet(self, amount=100):
-        """Add money to wallet via deposit endpoint"""
-        with self.client.post("/wallet/deposit", 
-            json={
-                "amount": amount,
-                "method": "BANK_ACCOUNT",
-                "sourceIdentifier": f"BANK_{fake.random_number(digits=8)}"
-            },
-            headers=self.get_headers(),
-            cookies=self.get_cookies(),
-            catch_response=True
-        ) as response:
-            if response.status_code == 201:
-                self.wallet_balance += amount
-                response.success()
-            else:
-                response.failure(f"Add money failed: {response.text}")
-    
     def get_balance(self):
         """Get current wallet balance"""
+        if not self.auth_token:
+            self.login_user()
+            
         with self.client.get("/wallet/balance",
             headers=self.get_headers(),
             cookies=self.get_cookies(),
             catch_response=True
         ) as response:
             if response.status_code == 200:
-                try:
-                    data = response.json()
-                    self.wallet_balance = data.get('balance', 0)
-                    response.success()
-                except:
-                    response.failure("Failed to parse balance response")
+                data = response.json()
+                self.wallet_balance = data.get('balance', 0)
+                response.success()
+                return self.wallet_balance
             else:
                 response.failure(f"Get balance failed: {response.text}")
-    
+                return 0
+
     def create_recipient_user(self):
         """Create a recipient user for P2P transfers"""
-        timestamp = int(time.time())
-        recipient_id = str(uuid.uuid4())[:8]
-        recipient_email = f"recipient_{recipient_id}_{timestamp}@example.com"
+        recipient_email = fake.email()
         password = "TestPassword123!"
         
         # Register recipient
@@ -145,181 +147,86 @@ class WalletUser(HttpUser):
 
 
 class NewUserJourney(TaskSet):
-    """Tasks for new user journey: register → login → check balance → add money"""
+    """Tasks for new user journey: register → login → check balance"""
     
-    @task(3)
+    @task(5)
     def check_balance(self):
         """Check wallet balance"""
-        if self.user.auth_token:
-            self.user.get_balance()
-    
-    @task(2)
-    def add_money(self):
-        """Add money to wallet"""
-        if self.user.auth_token:
-            amount = random.uniform(50, 500)
-            self.user.add_money_to_wallet(amount)
+        self.user.get_balance()
     
     @task(1)
     def get_transactions(self):
         """Get transaction history"""
-        if self.user.auth_token:
-            with self.client.get("/transactions",
-                headers=self.user.get_headers(),
-                cookies=self.user.get_cookies(),
-                catch_response=True
-            ) as response:
-                if response.status_code == 200:
-                    response.success()
-                else:
-                    response.failure(f"Get transactions failed: {response.text}")
+        if not self.user.auth_token:
+            self.user.login_user()
+            
+        with self.client.get("/transactions",
+            headers=self.user.get_headers(),
+            cookies=self.user.get_cookies(),
+            catch_response=True
+        ) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Get transactions failed: {response.text}")
 
 
 class ExistingUserJourney(TaskSet):
-    """Tasks for existing user: login → transfer → check history"""
-    
-    def on_start(self):
-        """Ensure user has money for transfers"""
-        if self.user.auth_token:
-            # Add initial money and update balance
-            self.user.add_money_to_wallet(1000)
-            time.sleep(1)  # Wait a bit for transaction to process
-            self.user.get_balance()
+    """Tasks for existing user: login → check balance → check history"""
     
     @task(4)
     def check_balance(self):
         """Check wallet balance"""
-        if self.user.auth_token:
-            self.user.get_balance()
-    
-    @task(2)
-    def p2p_transfer(self):
-        """Make P2P transfer"""
-        if not self.user.auth_token:
-            return
-            
-        # Ensure we have recent balance info
         self.user.get_balance()
-        
-        # Only transfer if we have sufficient funds
-        if self.user.wallet_balance < 20:
-            self.user.add_money_to_wallet(100)
-            time.sleep(1)
-            self.user.get_balance()
-            
-        if self.user.wallet_balance >= 20:
-            recipient_email = self.user.create_recipient_user()
-            if recipient_email:
-                # Transfer a small amount (max 10% of balance, min 5)
-                max_transfer = min(50, self.user.wallet_balance * 0.1)
-                amount = random.uniform(5, max_transfer)
-                
-                with self.client.post("/transactions/p2p",
-                    json={
-                        "recipientIdentifier": recipient_email,
-                        "amount": amount
-                    },
-                    headers=self.user.get_headers(),
-                    cookies=self.user.get_cookies(),
-                    catch_response=True
-                ) as response:
-                    if response.status_code == 201:
-                        self.user.wallet_balance -= amount
-                        response.success()
-                    else:
-                        response.failure(f"P2P transfer failed: {response.text}")
     
     @task(1)
     def get_transactions(self):
         """Get transaction history"""
-        if self.user.auth_token:
-            with self.client.get("/transactions",
-                headers=self.user.get_headers(),
-                cookies=self.user.get_cookies(),
-                catch_response=True
-            ) as response:
-                if response.status_code == 200:
-                    response.success()
-                else:
-                    response.failure(f"Get transactions failed: {response.text}")
+        if not self.user.auth_token:
+            self.user.login_user()
+            
+        with self.client.get("/transactions",
+            headers=self.user.get_headers(),
+            cookies=self.user.get_cookies(),
+            catch_response=True
+        ) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Get transactions failed: {response.text}")
 
 
 class FrequentUserJourney(TaskSet):
-    """Tasks for frequent user: multiple operations"""
-    
-    def on_start(self):
-        """Ensure user has money for multiple operations"""
-        if self.user.auth_token:
-            self.user.add_money_to_wallet(2000)
-            time.sleep(1)
-            self.user.get_balance()
+    """Tasks for frequent user: balance checks and DEBIN requests"""
     
     @task(5)
     def check_balance(self):
         """Check wallet balance frequently"""
-        if self.user.auth_token:
-            self.user.get_balance()
-    
-    @task(3)
-    def multiple_small_transfers(self):
-        """Make multiple small transfers"""
-        if not self.user.auth_token:
-            return
-            
         self.user.get_balance()
-        
-        if self.user.wallet_balance < 50:
-            self.user.add_money_to_wallet(200)
-            time.sleep(1)
-            self.user.get_balance()
-        
-        # Make 2-3 small transfers
-        num_transfers = random.randint(1, 2)
-        for _ in range(num_transfers):
-            if self.user.wallet_balance >= 10:
-                recipient_email = self.user.create_recipient_user()
-                if recipient_email:
-                    amount = random.uniform(5, 15)
-                    
-                    with self.client.post("/transactions/p2p",
-                        json={
-                            "recipientIdentifier": recipient_email,
-                            "amount": amount
-                        },
-                        headers=self.user.get_headers(),
-                        cookies=self.user.get_cookies(),
-                        catch_response=True
-                    ) as response:
-                        if response.status_code == 201:
-                            self.user.wallet_balance -= amount
-                            response.success()
-                        else:
-                            response.failure(f"Small transfer failed: {response.text}")
-                            break
-                time.sleep(0.5)  # Small delay between transfers
     
     @task(2)
     def get_transactions(self):
         """Get transaction history"""
-        if self.user.auth_token:
-            with self.client.get("/transactions",
-                headers=self.user.get_headers(),
-                cookies=self.user.get_cookies(),
-                catch_response=True
-            ) as response:
-                if response.status_code == 200:
-                    response.success()
-                else:
-                    response.failure(f"Get transactions failed: {response.text}")
+        if not self.user.auth_token:
+            self.user.login_user()
+            
+        with self.client.get("/transactions",
+            headers=self.user.get_headers(),
+            cookies=self.user.get_cookies(),
+            catch_response=True
+        ) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Get transactions failed: {response.text}")
     
     @task(1)
     def request_debin(self):
-        """Request DEBIN (reduced frequency to avoid external service overload)"""
+        """Request DEBIN"""
         if not self.user.auth_token:
-            return
+            self.user.login_user()
             
-        # Only try DEBIN occasionally and with smaller amounts
-        amount = random.uniform(10, 50)
+        amount = random.uniform(50, 200)
         
         with self.client.post("/wallet/topup/debin",
             json={"amount": amount},
@@ -328,24 +235,23 @@ class FrequentUserJourney(TaskSet):
             catch_response=True
         ) as response:
             if response.status_code == 201:
-                self.user.wallet_balance += amount
+                # Get updated balance after successful DEBIN
+                self.user.get_balance()
                 response.success()
             else:
-                # Don't fail the test for DEBIN errors as they might be external service issues
-                response.success()  # Mark as success to avoid skewing results
+                response.failure(f"DEBIN request failed: {response.text}")
 
 
 class DebinMassiveLoad(TaskSet):
-    """DEBIN load testing with controlled frequency"""
+    """Massive DEBIN requests for stress testing"""
     
     @task(1)
     def massive_debin_requests(self):
-        """Make DEBIN requests with rate limiting"""
+        """Make massive DEBIN requests"""
         if not self.user.auth_token:
-            return
+            self.user.login_user()
             
-        # Reduced frequency and amounts for DEBIN to avoid overwhelming external service
-        amount = random.uniform(5, 25)
+        amount = random.uniform(50, 200)
         
         with self.client.post("/wallet/topup/debin",
             json={"amount": amount},
@@ -354,51 +260,92 @@ class DebinMassiveLoad(TaskSet):
             catch_response=True
         ) as response:
             if response.status_code == 201:
-                self.user.wallet_balance += amount
+                # Get updated balance after successful DEBIN
+                self.user.get_balance()
                 response.success()
             else:
-                # Mark DEBIN failures as success to not skew overall results
-                # since they might be due to external service limitations
-                response.success()
+                response.failure(f"DEBIN request failed: {response.text}")
+
+
+class ExternalBankTransferLoad(TaskSet):
+    """External bank transfer testing using eva-bank service"""
+    
+    @task(3)
+    def external_bank_transfer(self):
+        """Simulate external bank transfer via eva-bank service"""
+        amount = random.uniform(50, 500)
         
-        # Add delay to reduce load on external service
-        time.sleep(random.uniform(2, 5))
+        # Call eva-bank transfer endpoint which will call back to walle-app
+        with self.client.post("/api/transfer",
+            json={
+                "amount": amount,
+                "alias": CONSTANT_BANK_USER["alias"],  # Use constant user alias
+                "source": f"external_bank_{random.randint(1000, 9999)}"
+            },
+            base_url="http://eva-bank:3001",  # Call eva-bank directly
+            catch_response=True
+        ) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"External bank transfer failed: {response.text}")
 
-
-# User classes with adjusted weights
+# User classes for different scenarios
 class NewUser(WalletUser):
     tasks = [NewUserJourney]
     weight = 3
+
 
 class ExistingUser(WalletUser):
     tasks = [ExistingUserJourney]
     weight = 5
 
+
 class FrequentUser(WalletUser):
     tasks = [FrequentUserJourney]
     weight = 2
 
+
 class DebinUser(WalletUser):
     tasks = [DebinMassiveLoad]
-    weight = 1  # Reduced weight to limit DEBIN load
+    weight = 1
 
 
-# Event listeners for logging
+class ExternalBankUser(WalletUser):
+    """User focused on external bank transfer testing"""
+    tasks = [ExternalBankTransferLoad]
+    weight = 2
+    wait_time = between(2, 5)  # Slower pace for external operations
+
+
+# Event handlers for custom metrics
 @events.request.add_listener
 def on_request(request_type, name, response_time, response_length, exception, context, **kwargs):
-    """Log request details"""
+    """Custom request handler for additional metrics"""
     if exception:
         print(f"Request failed: {name} - {exception}")
 
+
 @events.test_start.add_listener
 def on_test_start(environment, **kwargs):
-    """Called when test starts"""
-    print("🚀 Wall-E Load Test Started!")
-    print(f"Target host: {environment.host}")
-    print(f"Users: {environment.runner.target_user_count if hasattr(environment.runner, 'target_user_count') else 'Unknown'}")
+    """Handler for test start"""
+    print("=== Wall-E Load Test Started ===")
+    print(f"Host: {environment.host}")
+    print(f"Users: {getattr(environment, 'user_count', 'N/A')}")
+    
+    # Create constant bank user for external transfers
+    print("🏦 Setting up constant bank user...")
+    create_constant_bank_user()
+
 
 @events.test_stop.add_listener
 def on_test_stop(environment, **kwargs):
-    """Called when test stops"""
-    print("🏁 Wall-E Load Test Completed!")
-    print("Check the Locust web interface for detailed results.") 
+    """Handler for test stop"""
+    print("=== Wall-E Load Test Finished ===")
+    
+    # Print summary statistics
+    stats = environment.stats
+    print(f"Total requests: {stats.total.num_requests}")
+    print(f"Total failures: {stats.total.num_failures}")
+    print(f"Average response time: {stats.total.avg_response_time:.2f}ms")
+    print(f"Requests per second: {stats.total.current_rps:.2f}") 
