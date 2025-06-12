@@ -17,7 +17,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "npm run test:setup && sleep 5 && npm run test:db:setup && jest --config ./test/jest-e2e.json && npm run test:teardown",
     "test:e2e:external": "npm run test:setup && sleep 5 && npm run test:db:setup && jest --config ./test/jest-e2e.json --testNamePattern='External Bank' && npm run test:teardown",
     "test:e2e:transactions": "npm run test:setup && sleep 5 && npm run test:db:setup && jest --config ./test/jest-e2e.json --testNamePattern='transactions' && npm run test:teardown",
     "test:setup": "docker compose -f docker-compose.test.yml up -d",

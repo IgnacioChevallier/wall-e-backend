@@ -4,12 +4,14 @@ import {
   IsNumber,
   IsEnum,
   IsOptional,
+  IsPositive,
 } from 'class-validator';
 import { TransactionType } from '../../../generated/prisma'; // Adjust path if necessary
 
 export class CreateTransactionDto {
   @IsNumber()
   @IsNotEmpty()
+  @IsPositive()
   amount: number;
 
   @IsEnum(TransactionType)
