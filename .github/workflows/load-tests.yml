@@ -63,7 +63,7 @@ jobs:
         run: npm ci
 
       - name: Install eva-bank dependencies
-        working-directory: eva-bank
+        working-directory: src/external-bank
         run: npm ci
 
       - name: Install Python dependencies
@@ -80,7 +80,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:password@localhost:5432/walle_db
 
       - name: Start eva-bank service
-        working-directory: eva-bank
+        working-directory: src/external-bank
         run: |
           npm start &
           sleep 5
