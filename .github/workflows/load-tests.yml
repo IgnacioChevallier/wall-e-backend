@@ -18,11 +18,17 @@ on:
         required: false
         type: string
         default: '5m'
+  schedule:
+    # Run load tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
 
 jobs:
   load-test:
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: wall-e-backend
+
     services:
       postgres:
         image: postgres:15
@@ -46,7 +52,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: wall-e-backend/package-lock.json
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -132,7 +138,7 @@ jobs:
         if: always()
         with:
           name: load-test-reports
-          path: tests/load/reports/
+          path: wall-e-backend/tests/load/reports/
           retention-days: 30
 
       - name: Check performance thresholds
