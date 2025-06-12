@@ -42,6 +42,29 @@ describe('TransactionsController (e2e)', () => {
     await prisma.wallet.deleteMany();
     await prisma.user.deleteMany();
 
+    // Create SYSTEM user first (required for wallet service transactions)
+    // Use upsert to avoid unique constraint violations
+    await prisma.user.upsert({
+      where: { id: 'SYSTEM' },
+      update: {},
+      create: {
+        id: 'SYSTEM',
+        email: 'system@walle.internal',
+        password: 'system-password-not-used',
+        alias: 'SYSTEM',
+      },
+    });
+
+    // Create system wallet
+    const systemWallet = await prisma.wallet.upsert({
+      where: { userId: 'SYSTEM' },
+      update: {},
+      create: {
+        userId: 'SYSTEM',
+        balance: 0,
+      },
+    });
+
     // Generate unique test data for each test
     const timestamp = Date.now();
     const testEmail = `test${timestamp}@example.com`;
@@ -91,7 +114,7 @@ describe('TransactionsController (e2e)', () => {
         .post('/transactions')
         .send({
           amount: 100.5,
-          type: 'IN', // Use correct transaction type from schema
+          type: 'IN',
           walletId: testWalletId,
           description: 'Test transaction',
         })
@@ -143,8 +166,8 @@ describe('TransactionsController (e2e)', () => {
     it('should create a new transaction', () => {
       const newTransaction = {
         amount: 100.5,
-        type: 'IN', // Use correct transaction type from schema
-        walletId: testWalletId, // Use the actual test wallet ID
+        type: 'IN',
+        walletId: testWalletId,
         description: 'Test transaction',
       };
 

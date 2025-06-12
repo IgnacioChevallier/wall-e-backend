@@ -6,9 +6,11 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "moduleNameMapper": {
+  "moduleNameMapping": {
     "^src/(.*)$": "<rootDir>/../src/$1"
   },
   "testTimeout": 30000,
-  "setupFilesAfterEnv": ["<rootDir>/setup-e2e.ts"]
+  "setupFilesAfterEnv": ["<rootDir>/setup-e2e.ts"],
+  "maxWorkers": 1,
+  "runInBand": true
 }
