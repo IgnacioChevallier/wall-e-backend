@@ -13,10 +13,8 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
-EXPOSE 3000
-
-# Use development mode with hot reloading
-CMD ["npm", "run", "start:dev"]
+# Build the app
+RUN npm run build
 
 # Production stage
 FROM node:20-alpine AS production
