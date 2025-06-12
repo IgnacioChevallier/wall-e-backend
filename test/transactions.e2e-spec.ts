@@ -3,29 +3,57 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import { PrismaService } from '../src/prisma/prisma.service';
+import { ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 
 describe('TransactionsController (e2e)', () => {
   let app: INestApplication<App>;
+  let prisma: PrismaService;
   let authCookie: string;
   let testUserId: string;
   let testWalletId: string;
   let testTransactionId: string;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    prisma = app.get<PrismaService>(PrismaService);
+
+    // Apply the same global configuration as in main.ts
+    app.use(cookieParser());
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
+
     await app.init();
+  });
+
+  beforeEach(async () => {
+    // Clean up database before each test
+    await prisma.transaction.deleteMany();
+    await prisma.wallet.deleteMany();
+    await prisma.user.deleteMany();
+
+    // Generate unique test data for each test
+    const timestamp = Date.now();
+    const testEmail = `test${timestamp}@example.com`;
+    const testAlias = `testuser${timestamp}`;
 
     // Create a test user and get auth cookie
     const registerResponse = await request(app.getHttpServer())
       .post('/auth/register')
       .send({
-        email: 'test@example.com',
+        email: testEmail,
         password: 'password123',
-        alias: 'testuser'
+        alias: testAlias
       })
       .expect(201);
 
@@ -39,31 +67,40 @@ describe('TransactionsController (e2e)', () => {
       authCookie = '';
     }
 
-    // Get user info by decoding the JWT (for testing purposes, we'll get it from login)
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'test@example.com',
-        password: 'password123'
-      })
-      .expect(200);
+    // Get user data by querying the database directly since registration doesn't return user data
+    const user = await prisma.user.findUnique({
+      where: { email: testEmail },
+      include: { wallet: true }
+    });
 
-    // For the test, we'll need to get the user ID somehow. 
-    // Let's create a test transaction first to get IDs
-    const transactionResponse = await request(app.getHttpServer())
-      .post('/transactions')
-      .send({
-        amount: 100.50,
-        type: 'DEPOSIT',
-        walletId: 'test-wallet-id',
-        description: 'Test transaction'
-      })
-      .expect(201);
+    if (!user) {
+      throw new Error('Test user not found after registration');
+    }
 
-    testTransactionId = transactionResponse.body.id;
+    testUserId = user.id;
+    testWalletId = user.wallet?.id || '';
+
+    // Only create test transaction if we have a valid wallet ID
+    if (testWalletId) {
+      const transactionResponse = await request(app.getHttpServer())
+        .post('/transactions')
+        .send({
+          amount: 100.50,
+          type: 'IN', // Use correct transaction type from schema
+          walletId: testWalletId,
+          description: 'Test transaction'
+        })
+        .expect(201);
+
+      testTransactionId = transactionResponse.body.id;
+    }
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
+    // Clean up after all tests
+    await prisma.transaction.deleteMany();
+    await prisma.wallet.deleteMany();
+    await prisma.user.deleteMany();
     await app.close();
   });
 
@@ -101,8 +138,8 @@ describe('TransactionsController (e2e)', () => {
     it('should create a new transaction', () => {
       const newTransaction = {
         amount: 100.50,
-        type: 'DEPOSIT',
-        walletId: 'test-wallet-id',
+        type: 'IN', // Use correct transaction type from schema
+        walletId: testWalletId, // Use the actual test wallet ID
         description: 'Test transaction'
       };
 
@@ -114,7 +151,7 @@ describe('TransactionsController (e2e)', () => {
           expect(res.body).toHaveProperty('id');
           expect(res.body.amount).toBe(newTransaction.amount);
           expect(res.body.type).toBe(newTransaction.type);
-          expect(res.body.walletId).toBe(newTransaction.walletId);
+          expect(res.body.senderWalletId).toBe(newTransaction.walletId);
         });
     });
 
@@ -122,6 +159,7 @@ describe('TransactionsController (e2e)', () => {
       const invalidTransaction = {
         amount: 'invalid-amount',
         type: 'INVALID_TYPE',
+        walletId: testWalletId
       };
 
       return request(app.getHttpServer())
@@ -144,9 +182,48 @@ describe('TransactionsController (e2e)', () => {
   });
 
   describe('/transactions/p2p (POST)', () => {
+    let recipientEmail: string;
+    let recipientUserId: string;
+
+    beforeEach(async () => {
+      // Create a recipient user for P2P transfers
+      const recipientTimestamp = Date.now() + 1; // Ensure different timestamp
+      recipientEmail = `recipient${recipientTimestamp}@example.com`;
+      const recipientAlias = `recipient${recipientTimestamp}`;
+
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: recipientEmail,
+          password: 'password123',
+          alias: recipientAlias
+        })
+        .expect(201);
+
+      // Get recipient user data
+      const recipientUser = await prisma.user.findUnique({
+        where: { email: recipientEmail },
+        include: { wallet: true }
+      });
+
+      if (!recipientUser) {
+        throw new Error('Recipient user not found after registration');
+      }
+
+      recipientUserId = recipientUser.id;
+
+      // Add balance to sender's wallet for P2P transfers
+      if (testWalletId) {
+        await prisma.wallet.update({
+          where: { id: testWalletId },
+          data: { balance: 1000.0 } // Add sufficient balance for transfers
+        });
+      }
+    });
+
     it('should create a P2P transfer with valid auth cookie', () => {
       const p2pTransfer = {
-        recipientIdentifier: 'test-recipient-id',
+        recipientIdentifier: recipientEmail, // Use the actual recipient email
         amount: 50.25
       };
 
@@ -156,14 +233,16 @@ describe('TransactionsController (e2e)', () => {
         .send(p2pTransfer)
         .expect(201)
         .expect((res) => {
-          expect(res.body).toHaveProperty('id');
-          expect(res.body.amount).toBe(p2pTransfer.amount);
+          expect(res.body).toHaveProperty('message');
+          expect(res.body.message).toBe('Transfer successful');
+          expect(res.body).toHaveProperty('senderTransaction');
+          expect(res.body).toHaveProperty('recipientTransaction');
         });
     });
 
     it('should return 401 for P2P transfer without auth cookie', () => {
       const p2pTransfer = {
-        recipientIdentifier: 'test-recipient-id',
+        recipientIdentifier: recipientEmail,
         amount: 50.25
       };
 
