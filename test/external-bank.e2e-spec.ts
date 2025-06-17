@@ -40,7 +40,7 @@ describe('External Bank Integration (e2e)', () => {
     externalBankService =
       moduleFixture.get<ExternalBankService>(ExternalBankService);
 
-    // Mock ALL external bank service HTTP calls - no real network calls
+    // Mocked external bank service HTTP calls 
     jest.spyOn(externalBankService, 'Transfer').mockImplementation((data) => {
       // Validate required fields for transfer
       if (!data.amount || !data.alias || !data.source) {
